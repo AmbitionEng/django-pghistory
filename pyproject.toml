@@ -50,8 +50,8 @@ classifiers = [
 ]
 license = "BSD-3-Clause"
 readme = "README.md"
-homepage = "https://github.com/Opus10/django-pghistory"
-repository = "https://github.com/Opus10/django-pghistory"
+homepage = "https://github.com/AmbitionEng/django-pghistory"
+repository = "https://github.com/AmbitionEng/django-pghistory"
 documentation = "https://django-pghistory.readthedocs.io"
 
 [tool.poetry.dependencies]
