@@ -4,7 +4,7 @@
 
 #### Changes
 
-  - Changed project ownership to `AmbitionEng` by [@wesleykendall](https://github.com/wesleykendall) in [#176](https://github.com/AmbitionEng/django-pgactivity/pull/176).
+  - Changed project ownership to `AmbitionEng` by [@wesleykendall](https://github.com/wesleykendall) in [#180](https://github.com/AmbitionEng/django-pgactivity/pull/180).
 
 ## 3.5.0 (2024-11-01)
 
