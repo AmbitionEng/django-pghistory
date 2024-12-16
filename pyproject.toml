@@ -30,7 +30,7 @@ packages = [
 exclude = [
   "*/tests/"
 ]
-version = "3.5.0"
+version = "3.5.1"
 description = "History tracking for Django and Postgres"
 authors = ["Wes Kendall"]
 classifiers = [
@@ -50,8 +50,8 @@ classifiers = [
 ]
 license = "BSD-3-Clause"
 readme = "README.md"
-homepage = "https://github.com/Opus10/django-pghistory"
-repository = "https://github.com/Opus10/django-pghistory"
+homepage = "https://github.com/AmbitionEng/django-pghistory"
+repository = "https://github.com/AmbitionEng/django-pghistory"
 documentation = "https://django-pghistory.readthedocs.io"
 
 [tool.poetry.dependencies]
