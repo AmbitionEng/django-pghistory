@@ -4,7 +4,7 @@
 
 #### Changes
 
-  - Ignore `test` command when tracking context [@iamsauravsharma ](https://github.com/iamsauravsharma) in [#180](https://github.com/AmbitionEng/django-pghistory/pull/182).
+  - Ignore `test` command when tracking context [@iamsauravsharma](https://github.com/iamsauravsharma) in [#180](https://github.com/AmbitionEng/django-pghistory/pull/182).
 
 ## 3.5.1 (2024-12-15)
 
