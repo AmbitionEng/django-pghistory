@@ -74,10 +74,11 @@ if __name__ == "__main__":
     if (
         len(sys.argv) > 1
         and not sys.argv[1].startswith("runserver")
-        and not sys.argv[1] == "migrate"
+        and sys.argv[1] not in ["migrate", "test"]
     ):
         # Group history context under the same management command if
-        # we aren't running a server.
+        # we aren't running a server or running migration during migrate
+        # or test command.
         history_context = pghistory.context(command=sys.argv[1])
     else:
         history_context = contextlib.ExitStack()
@@ -90,7 +91,7 @@ Above we ignore tracking context for `runserver` commands. Otherwise every singl
 
 !!! note
 
-    We also ignore `migrate`. Some custom schema-altering SQL can disrupt pghistory's context tracking. See [Issue #109](https://github.com/Opus10/django-pghistory/issues/109) for more information.
+    We also ignore `migrate` and `test`. Some custom schema-altering SQL can disrupt pghistory's context tracking. See [Issue #109](https://github.com/Opus10/django-pghistory/issues/109) for more information.
 
 ## Celery Tasks
 
