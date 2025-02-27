@@ -204,7 +204,7 @@ def _generate_event_model_name(base_model, tracked_model, fields):
 
 
 def _get_field_construction(field):
-    _, _, args, kwargs = field.deconstruct()
+    _, cls_path, args, kwargs = field.deconstruct()
 
     if isinstance(field, models.ForeignKey):
         default = config.foreign_key_field()
@@ -215,7 +215,7 @@ def _get_field_construction(field):
 
     kwargs.update(default.kwargs)
 
-    cls = field.__class__
+    cls = import_string(cls_path)
     if isinstance(field, models.OneToOneField):
         cls = models.ForeignKey
     elif isinstance(field, models.FileField):
