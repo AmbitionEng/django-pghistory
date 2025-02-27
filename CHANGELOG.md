@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.5.3 (2025-02-27)
+
+#### Fixes
+
+  - Fix custom field support by deconstructing field classes correctly in history model by [@iamsauravsharma](https://github.com/iamsauravsharma) in [#184](https://github.com/AmbitionEng/django-pghistory/pull/184).
+
 ## 3.5.2 (2025-02-05)
 
 #### Changes
