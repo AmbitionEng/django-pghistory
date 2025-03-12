@@ -928,7 +928,9 @@ def test_generated_field():
 
     class GeneratedFieldModel(models.Model):
         value = models.TextField()
-        generated_field = models.GeneratedField(expression=F("value"), output_field=models.TextField(), db_persist=True)
+        generated_field = models.GeneratedField(
+            expression=F("value"), output_field=models.TextField(), db_persist=True
+        )
 
     tracked = pghistory.create_event_model(GeneratedFieldModel)
 
