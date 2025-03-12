@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.5.4 (2025-03-12)
+
+#### Changes
+
+  - Ensure generated fields on models are tracked properly by [pmdevita](https://github.com/pmdevita) in [#187](https://github.com/AmbitionEng/django-pghistory/pull/187).
+
 ## 3.5.3 (2025-02-27)
 
 #### Fixes
