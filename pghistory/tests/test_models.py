@@ -4,9 +4,13 @@ import ddf
 import django
 import pytest
 from django.core.management import call_command
+from django.db import models
+from django.db.models import F
 
 import pghistory.runtime
 import pghistory.tests.models as test_models
+from pghistory import Update
+from pghistory.trigger import Event
 
 
 @pytest.mark.django_db
@@ -913,3 +917,23 @@ def test_custom_foreign_key_to_m2m_through():
     will perform model checks using Django's check framework
     """
     call_command("check")
+
+
+@pytest.mark.skipif(django.VERSION[0] < 5, reason="GeneratedField not supported on Django<5")
+@pytest.mark.django_db
+def test_generated_field():
+    """
+    Ensure that GeneratedFields are not included in the trigger's SQL
+    """
+
+    class GeneratedFieldModel(models.Model):
+        value = models.TextField()
+        generated_field = models.GeneratedField(
+            expression=F("value"), output_field=models.TextField(), db_persist=True
+        )
+
+    tracked = pghistory.create_event_model(GeneratedFieldModel)
+
+    event = Event(event_model=tracked, label="GeneratedFieldModel", operation=Update)
+    sql = event.get_func(tracked)
+    assert "generated_field" not in sql

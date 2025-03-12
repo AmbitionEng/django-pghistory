@@ -1,5 +1,6 @@
 import re
 
+import django
 import pgtrigger
 from django.db import models
 
@@ -73,6 +74,7 @@ class Event(pgtrigger.Trigger):
             f.column: f'{self.row}."{f.column}"'
             for f in self.event_model._meta.fields
             if not isinstance(f, models.AutoField)
+            and not (django.VERSION[0] >= 5 and isinstance(f, models.GeneratedField))
             and f.name in tracked_model_fields
             and f.concrete
         }
