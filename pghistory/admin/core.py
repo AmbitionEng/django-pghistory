@@ -166,7 +166,10 @@ class BaseEventAdmin(admin.ModelAdmin):
         return False
 
     def changelist_view(self, request, extra_context=None):
-        extra_context = {"title": self.model._meta.verbose_name_plural.capitalize()}
+        extra_context = extra_context or {}
+        extra_context.update(
+            {"title": self.model._meta.verbose_name_plural.capitalize()}
+        )
         obj = _get_obj(request.GET.get("obj"))
         method = request.GET.get("method")
         model = _get_model(request.GET.get("model"))
