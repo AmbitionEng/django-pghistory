@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.5.5 (2025-05-27)
+
+#### Changes
+
+  - Allow passing extra context to the admin template [Mariatta](https://github.com/Mariatta) in [#192](https://github.com/AmbitionEng/django-pghistory/pull/192).
+
 ## 3.5.4 (2025-03-12)
 
 #### Changes
