@@ -1,16 +1,22 @@
 # Changelog
 
-## 3.5.5 (2025-05-27)
+## 3.6.0 (2025-04-20)
 
 #### Changes
 
-  - Allow passing extra context to the admin template [Mariatta](https://github.com/Mariatta) in [#192](https://github.com/AmbitionEng/django-pghistory/pull/192).
+  - Add support for Django 5.2, drop support for Postgres 13 by [@wesleykendall](https://github.com/wesleykendall) in [#194](https://github.com/AmbitionEng/django-pghistory/pull/194).
+
+## 3.5.5 (2025-03-27)
+
+#### Changes
+
+  - Allow passing extra context to the admin template by [@Mariatta](https://github.com/Mariatta) in [#192](https://github.com/AmbitionEng/django-pghistory/pull/192).
 
 ## 3.5.4 (2025-03-12)
 
 #### Changes
 
-  - Ensure generated fields on models are tracked properly by [pmdevita](https://github.com/pmdevita) in [#187](https://github.com/AmbitionEng/django-pghistory/pull/187).
+  - Ensure generated fields on models are tracked properly by [@pmdevita](https://github.com/pmdevita) in [#187](https://github.com/AmbitionEng/django-pghistory/pull/187).
 
 ## 3.5.3 (2025-02-27)
 
