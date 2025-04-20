@@ -3,6 +3,7 @@ import uuid
 from contextlib import ExitStack as no_exception
 
 import ddf
+import django
 import pytest
 from django.apps import apps
 from django.db import DatabaseError, models
@@ -677,6 +678,16 @@ def test_factory(model_name, obj_field, fields, expected_model_name, expected_re
 
     assert cls.__name__ == expected_model_name
     assert cls._meta.get_field("pgh_obj").remote_field.related_name == expected_related_name
+
+
+if django.VERSION >= (5, 2):
+
+    def test_composite_pk():
+        """Test that composite primary keys are not supported"""
+        with pytest.raises(
+            ValueError, match="Tracking models with composite primary keys is not supported"
+        ):
+            pghistory.core.create_event_model(test_models.CompositePkModel, fields=["id1", "id2"])
 
 
 def test_empty_fields():

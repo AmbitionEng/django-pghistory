@@ -5,6 +5,7 @@ import re
 import sys
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
+import django
 import pgtrigger
 import pgtrigger.core
 from django.apps import apps
@@ -419,6 +420,10 @@ def create_event_model(
     event_model = import_string("pghistory.models.Event")
     base_model = base_model or config.base_model()
     assert issubclass(base_model, event_model)
+
+    if django.VERSION >= (5, 2):
+        if isinstance(tracked_model._meta.pk, models.CompositePrimaryKey):
+            raise ValueError("Tracking models with composite primary keys is not supported")
 
     obj_field = _get_obj_field(
         obj_field=obj_field,
