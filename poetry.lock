@@ -675,13 +675,13 @@ Django = ">=2.2"
 
 [[package]]
 name = "django-pgtrigger"
-version = "4.12.0"
+version = "4.14.0"
 description = "Postgres trigger support integrated with Django models."
 optional = false
-python-versions = "<4,>=3.8.0"
+python-versions = "<4,>=3.9.0"
 files = [
-    {file = "django_pgtrigger-4.12.0-py3-none-any.whl", hash = "sha256:12e7dd0f785d18f8e550f097d1eb7f5c4847a1e5bc4348723077a1973dc5d019"},
-    {file = "django_pgtrigger-4.12.0.tar.gz", hash = "sha256:eb1520df14396798f40b54260c68c262a08686793985ae8397c827d88befb61f"},
+    {file = "django_pgtrigger-4.14.0-py3-none-any.whl", hash = "sha256:9bda63fd7767bd4753179ec5d34f8c851ad94c5aa7ddf0fb46ac8a77e023fb81"},
+    {file = "django_pgtrigger-4.14.0.tar.gz", hash = "sha256:3bf25192d0520c6e683aa79bc5f807bb5f123871cdc28236fd40979261a4af41"},
 ]
 
 [package.dependencies]
@@ -2734,4 +2734,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9.0,<4"
-content-hash = "eed06fd759fdf8e9d434f0fa81becdbe702dde004892c64e9ed16d11cb3fa47b"
+content-hash = "6d55ddf9f0fdc31683f64bc09810497417fa2ec5a3d7e106ce1637b951987f24"
