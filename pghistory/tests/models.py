@@ -1,3 +1,4 @@
+import django
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -16,6 +17,14 @@ class UntrackedModel(models.Model):
 @pghistory.track()
 class BigAutoFieldModel(models.Model):
     id = models.BigAutoField(primary_key=True)
+
+
+if django.VERSION >= (5, 2):
+
+    class CompositePkModel(models.Model):
+        id1 = models.IntegerField()
+        id2 = models.IntegerField()
+        pk = models.CompositePrimaryKey("id1", "id2")
 
 
 class CustomAutoFieldModel(models.Model):

@@ -26,13 +26,17 @@ Note that currently `django-pghistory` uses row-level triggers, meaning a bulk u
 
 See the [Performance and Scaling](performance.md) section for tips and tricks on large history tables.
 
+## How do I associate the logged-in user with history?
+
+By using [Context Tracking](context.md). `django-pghistory` comes with a middleware that automatically enables it and tracks the URL and logged-in user of the request.
+
 ## How do I revert models?
 
 Check out the [Reverting Objects](reversion.md) section.
 
-## How do I only track a subset of models?
+## How do I conditionally track history?
 
-Add a condition to your tracker. See the [Conditional Tracking](event_tracking.md#conditional_tracking) subsection.
+Add a condition to your tracker to only track history when certain events occur. See the [Conditional Tracking](event_tracking.md#conditional_tracking) subsection.
 
 ## How do I track models with concrete inheritance?
 
@@ -123,12 +127,13 @@ For large backfills, consider bulk creating events. Get the event model by impor
 
 Consider opening a pull request if you'd like to contribute a more comprehensive backfill example to the docs or a top-level `backfill` function in the interface to help facilitate this.
 
+## Are composite primary keys supported?
+
+Not at the moment. We plan to support tracking models with composite primary keys when Django supports foreign keys to these models.
+
 ## How can I report issues or request features
 
 Open a [discussion](https://github.com/Opus10/django-pghistory/discussions) for a feature request. You're welcome to pair this with a pull request, but it's best to open a discussion first if the feature request is not trivial.
 
 For bugs, open an [issue](https://github.com/Opus10/django-pghistory/issues).
 
-## How can I support the author?
-
-By sponsoring [Wes Kendall](https://github.com/sponsors/wesleykendall). Even the smallest sponsorships are a nice motivation to maintain and enhance Opus10 libraries like django-pghistory.
