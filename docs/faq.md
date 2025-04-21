@@ -22,9 +22,9 @@ For those that are new to triggers and want additional confidence in their behav
 
 Although triggers will be issuing additional SQL statements to write events, keep in mind that this happens within the database instance itself. In other words, writing events does not incur additional expensive round-trip database calls. This results in a reduced performance impact when compared to other history tracking methods implemented in software.
 
-Note that currently `django-pghistory` uses row-level triggers, meaning a bulk update such as `Model.objects.update` over one hundred elements could perform one hundred queries within the database instance. We're planning to address this in a future version of `django-pghistory` by using statement-level triggers instead. See the [discussion here in django-pgtrigger](https://github.com/Opus10/django-pgtrigger/discussions/166).
+`django-pghistory` uses row-level triggers by default, meaning a bulk update such as `Model.objects.update` over one hundred elements could perform one hundred queries within the database instance. Use `level=pghistory.Statement` in [pghistory.track][] to leverage statement-level triggers for history tracking.
 
-See the [Performance and Scaling](performance.md) section for tips and tricks on large history tables.
+See the [Performance and Scaling](performance.md) section for more information around statement-level trigger caveats and more tips and tricks for performance.
 
 ## How do I associate the logged-in user with history?
 
