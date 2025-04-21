@@ -106,11 +106,14 @@ class Event(pgtrigger.Trigger):
         fields["pgh_label"] = f"'{self.label}'"
 
         if hasattr(self.event_model, "pgh_obj"):
-            fields["pgh_obj_id"] = f'{self.row}."{_get_pgh_obj_pk_col(self.event_model)}"'
+            fields["pgh_obj_id"] = f'{alias}."{_get_pgh_obj_pk_col(self.event_model)}"'
 
         if hasattr(self.event_model, "pgh_context"):
             if isinstance(self.event_model._meta.get_field("pgh_context"), models.ForeignKey):
-                fields["pgh_context_id"] = "_pgh_attach_context()"
+                if self.statement:
+                    fields["pgh_context_id"] = "_pgh_attached_context.value"
+                else:
+                    fields["pgh_context_id"] = "_pgh_attach_context()"
             elif isinstance(self.event_model._meta.get_field("pgh_context"), utils.JSONField):
                 fields["pgh_context"] = (
                     "COALESCE(NULLIF(CURRENT_SETTING('pghistory.context_metadata', TRUE), ''),"
@@ -132,13 +135,19 @@ class Event(pgtrigger.Trigger):
         vals = ", ".join(val for val in fields.values())
         if self.statement:
             cond_kwargs = pgtrigger.contrib.get_cond_values_func_template_kwargs(
-                condition=self.render_condition(model), model=model, operation=self.operation
+                condition=super().render_condition(model), model=model, operation=self.operation
             )
             sql = f"""
-                INSERT INTO "{self.event_model._meta.db_table}"
-                    ({cols}) SELECT {vals} FROM {cond_kwargs["cond_from"]};
+                WITH _pgh_attached_context AS (
+                    SELECT _pgh_attach_context() AS value
+                )
+                INSERT INTO "{self.event_model._meta.db_table}"({cols})
+                SELECT {vals} FROM (
+                    SELECT {alias}.* FROM {cond_kwargs["cond_from"]}
+                ) AS {alias}, _pgh_attached_context;
                 RETURN NULL;
             """
+            print("SQL", sql)
         else:
             sql = f"""
                 INSERT INTO "{self.event_model._meta.db_table}"

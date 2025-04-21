@@ -7,6 +7,7 @@ import re
 import sys
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
+import django
 import pgtrigger
 import pgtrigger.core
 from django.apps import apps

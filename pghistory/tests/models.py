@@ -44,6 +44,25 @@ class DenormContext(models.Model):
     fk_field = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True)
 
 
+@pghistory.track(context_field=pghistory.ContextJSONField(), statement=True)
+@pghistory.track(
+    pghistory.InsertEvent("snapshot_no_id_insert"),
+    pghistory.UpdateEvent("snapshot_no_id_update"),
+    obj_field=pghistory.ObjForeignKey(related_name="event_no_id"),
+    context_field=pghistory.ContextJSONField(),
+    context_id_field=None,
+    model_name="DenormContextEventNoIdStatement",
+    statement=True,
+)
+class DenormContextStatement(models.Model):
+    """
+    For testing denormalized context with statement-level triggers
+    """
+
+    int_field = models.IntegerField()
+    fk_field = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True)
+
+
 @pghistory.track(
     model_name="CustomModelSnapshot", obj_field=pghistory.ObjForeignKey(related_name="snapshot")
 )
@@ -152,6 +171,29 @@ class CustomSnapshotModel(
 class EventModel(models.Model):
     """
     For testing model events
+    """
+
+    dt_field = models.DateTimeField()
+    int_field = models.IntegerField()
+
+
+@pghistory.track(
+    pghistory.ManualEvent("manual_event"),
+    pghistory.InsertEvent("model.create"),
+    pghistory.UpdateEvent("before_update", row=pghistory.Old),
+    pghistory.DeleteEvent("before_delete", row=pghistory.Old),
+    pghistory.UpdateEvent("after_update", condition=pghistory.AnyChange("dt_field")),
+    statement=True,
+)
+@pghistory.track(
+    pghistory.Tracker("no_pgh_obj_manual_event"),
+    obj_field=None,
+    model_name="NoPghObjEventStatement",
+    statement=True,
+)
+class EventModelStatement(models.Model):
+    """
+    For testing model events with statement-level triggers
     """
 
     dt_field = models.DateTimeField()

@@ -76,9 +76,12 @@ def test_get_obj_field(settings):
 
 
 @pytest.mark.django_db
-def test_denorm_context_tracking():
+@pytest.mark.parametrize(
+    "denorm_context_model", [test_models.DenormContext, test_models.DenormContextStatement]
+)
+def test_denorm_context_tracking(denorm_context_model):
     """Test denormalized context tracking"""
-    denorm_model = ddf.G(test_models.DenormContext)
+    denorm_model = ddf.G(denorm_context_model)
     assert denorm_model.events.count() == 1
 
     event = denorm_model.events.first()
