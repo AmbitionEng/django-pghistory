@@ -408,8 +408,8 @@ def create_event_model(
         attrs: Additional attributes to add to the event model
         meta: Additional attributes to add to the Meta class of the event model.
         abstract: `True` if the generated model should be an abstract model.
-        level: The trigger level to use for tracking events or providing append-only protection.
-            Trackers that have `level` set to `pghistory.Statement` or `pghistory.Row` will not be overridden.
+        level: The trigger level to use for tracking events. Trackers that have `level` set
+            to `pghistory.Statement` or `pghistory.Row` will not be overridden.
 
     Returns:
         The event model class.
@@ -565,7 +565,7 @@ def track(
         base_model: The base model for the event model. Must inherit `pghistory.models.Event`.
         attrs: Additional attributes to add to the event model
         meta: Additional attributes to add to the Meta class of the event model.
-        level: The trigger level to use for tracking events or providing append-only protection.
+        level: The trigger level to use for tracking events.
     """
 
     def _model_wrapper(model_class):
