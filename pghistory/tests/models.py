@@ -200,6 +200,25 @@ class EventModelStatement(models.Model):
     int_field = models.IntegerField()
 
 
+@pghistory.track(
+    pghistory.InsertEvent("int_field1_created", condition=pghistory.Q(new__int_field1__gt=100)),
+    pghistory.UpdateEvent("int_field1_updated", condition=pghistory.AnyChange("int_field1")),
+    pghistory.UpdateEvent(
+        "int_field2_incr",
+        condition=pghistory.Q(old__int_field2__lt=pghistory.F("new__int_field2")),
+    ),
+    pghistory.DeleteEvent("int_field1_deleted", condition=pghistory.Q(old__int_field1__lt=50)),
+    statement=True,
+)
+class CondStatement(models.Model):
+    """
+    For testing conditional statement-level triggers
+    """
+
+    int_field1 = models.IntegerField()
+    int_field2 = models.IntegerField()
+
+
 class CustomEventModel(
     pghistory.create_event_model(
         EventModel,

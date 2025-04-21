@@ -141,17 +141,15 @@ class Event(pgtrigger.Trigger):
                 WITH _pgh_attached_context AS (
                     SELECT _pgh_attach_context() AS value
                 )
-                INSERT INTO "{self.event_model._meta.db_table}"({cols})
+                INSERT INTO "{self.event_model._meta.db_table}" ({cols})
                 SELECT {vals} FROM (
                     SELECT {alias}.* FROM {cond_kwargs["cond_from"]}
                 ) AS {alias}, _pgh_attached_context;
                 RETURN NULL;
             """
-            print("SQL", sql)
         else:
             sql = f"""
-                INSERT INTO "{self.event_model._meta.db_table}"
-                    ({cols}) VALUES ({vals});
+                INSERT INTO "{self.event_model._meta.db_table}" ({cols}) VALUES ({vals});
                 RETURN NULL;
             """
         return " ".join(line.strip() for line in sql.split("\n") if line.strip()).strip()
