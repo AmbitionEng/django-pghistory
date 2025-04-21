@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 import django
 import pgtrigger
@@ -31,6 +32,7 @@ class Event(pgtrigger.Composer):
     row = "NEW"
     event_model = None
     when = pgtrigger.After
+    level: Optional[pgtrigger.Level] = None
 
     def __init__(
         self,
@@ -68,8 +70,8 @@ class Event(pgtrigger.Composer):
             raise ValueError('Must provide "row"')
 
         self.level = level if level is not None else self.level
-        if self.level is None:  # pragma: no cover
-            self.level = config.level()
+        if self.level is None:
+            self.level = config.level()  # type: ignore
 
         super().__init__(operation=operation, condition=condition, when=when)
 
