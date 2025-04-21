@@ -284,6 +284,15 @@ def admin_list_display() -> List[str]:
     return getattr(settings, "PGHISTORY_ADMIN_LIST_DISPLAY", defaults)
 
 
+def statement() -> bool:
+    """True if we should use statement-level triggers by default.
+
+    Returns:
+        A boolean
+    """
+    return getattr(settings, "PGHISTORY_STATEMENT", False)
+
+
 def _get_kwargs(vals):
     return {
         key: val

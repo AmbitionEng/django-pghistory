@@ -106,6 +106,7 @@ Old = "OLD"
 For storing the trigger's "OLD" row in a [pghistory.RowEvent][]
 """
 
+
 __all__ = [
     "AnyChange",
     "AllChange",

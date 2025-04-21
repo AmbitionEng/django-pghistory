@@ -277,7 +277,7 @@ class EventsQueryCompiler(SQLCompiler):
             SELECT
               {col_select_clause}
             FROM (
-              VALUES ({', '.join(values_list)}) LIMIT 0
+              VALUES ({", ".join(values_list)}) LIMIT 0
             ) AS _pgh_obj_event({col_name_clause})
             WHERE pgh_model IS NOT NULL
         """

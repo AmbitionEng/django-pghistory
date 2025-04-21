@@ -1,5 +1,7 @@
 """Core functionality and interface of pghistory"""
 
+from __future__ import annotations
+
 import copy
 import re
 import sys
@@ -81,19 +83,21 @@ class ManualEvent(Tracker):
 class RowEvent(Tracker):
     """For tracking an event automatically based on row-level changes."""
 
-    condition: Union[Optional[pgtrigger.Condition], constants.Unset] = constants.UNSET
+    condition: Union[pgtrigger.Condition, None, constants.Unset] = constants.UNSET
     operation: Optional[pgtrigger.Operation] = None
     row: Optional[str] = None
     trigger_name: Optional[str] = None
+    statement: Optional[bool] = None
 
     def __init__(
         self,
         label: Optional[str] = None,
         *,
-        condition: Union[Optional[pgtrigger.Condition], constants.Unset] = constants.UNSET,
+        condition: Optional[pgtrigger.Condition] = None,
         operation: Optional[pgtrigger.Operation] = None,
         row: Optional[str] = None,
         trigger_name: Optional[str] = None,
+        statement: Optional[bool] = None,
     ):
         super().__init__(label=label)
 
@@ -101,6 +105,7 @@ class RowEvent(Tracker):
         self.operation = operation or self.operation
         self.row = row or self.row
         self.trigger_name = trigger_name or self.trigger_name or f"{self.label}_{self.operation}"
+        self.statement = statement if self.statement is not None else self.statement
 
         if self.condition is constants.UNSET:
             self.condition = pgtrigger.AnyChange() if self.operation == pgtrigger.Update else None
@@ -124,6 +129,7 @@ class RowEvent(Tracker):
                 row=self.row,
                 operation=self.operation,
                 condition=self.condition,
+                statement=self.statement,
             )
         )(event_model.pgh_tracked_model)
 
@@ -358,6 +364,7 @@ def create_event_model(
     attrs: Optional[Dict[str, Any]] = None,
     meta: Optional[Dict[str, Any]] = None,
     abstract: bool = True,
+    statement: Optional[bool] = None,
 ) -> Type[models.Model]:
     """
     Create an event model.
@@ -400,6 +407,8 @@ def create_event_model(
         attrs: Additional attributes to add to the event model
         meta: Additional attributes to add to the Meta class of the event model.
         abstract: `True` if the generated model should be an abstract model.
+        statement: Use a statement-level trigger instead of a row-level trigger for any trackers.
+            Trackers that have `statement` set to `True` or `False` will not be overridden.
 
     Returns:
         The event model class.
@@ -416,9 +425,16 @@ def create_event_model(
     if not trackers:
         trackers = config.default_trackers() or (InsertEvent(), UpdateEvent())
 
+    for tracker in trackers:
+        if isinstance(tracker, RowEvent) and tracker.statement is None:
+            tracker.statement = statement
+
     event_model = import_string("pghistory.models.Event")
     base_model = base_model or config.base_model()
     assert issubclass(base_model, event_model)
+
+    if django.VERSION >= (5, 2) and isinstance(tracked_model._meta.pk, models.CompositePrimaryKey):
+        raise ValueError("Tracking models with composite primary keys is not supported")
 
     obj_field = _get_obj_field(
         obj_field=obj_field,
@@ -505,6 +521,7 @@ def track(
     base_model: Optional[Type[models.Model]] = None,
     attrs: Optional[Dict[str, Any]] = None,
     meta: Optional[Dict[str, Any]] = None,
+    statement: Optional[bool] = None,
 ):
     """
     A decorator for tracking events for a model.
@@ -547,6 +564,7 @@ def track(
         base_model: The base model for the event model. Must inherit `pghistory.models.Event`.
         attrs: Additional attributes to add to the event model
         meta: Additional attributes to add to the Meta class of the event model.
+        statement: Use a statement-level trigger instead of a row-level trigger.
     """
 
     def _model_wrapper(model_class):
@@ -565,6 +583,7 @@ def track(
             base_model=base_model,
             attrs=attrs,
             meta=meta,
+            statement=statement,
         )
 
         return model_class
