@@ -1,10 +1,10 @@
 # Changelog
 
-## 3.6.0 (2025-04-20)
+## 3.6.0 (2025-04-21)
 
 #### Changes
 
-  - Add support for Django 5.2, drop support for Postgres 13 by [@wesleykendall](https://github.com/wesleykendall) in [#194](https://github.com/AmbitionEng/django-pghistory/pull/194).
+  - Add support for Django 5.2, drop support for Postgres 13 by [@wesleykendall](https://github.com/wesleykendall) in [#196](https://github.com/AmbitionEng/django-pghistory/pull/196).
 
 ## 3.5.5 (2025-03-27)
 
