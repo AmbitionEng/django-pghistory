@@ -3,6 +3,7 @@
 import copy
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type, Union
 
+import pgtrigger
 from django.apps import apps
 from django.conf import settings
 from django.db import models
@@ -284,13 +285,13 @@ def admin_list_display() -> List[str]:
     return getattr(settings, "PGHISTORY_ADMIN_LIST_DISPLAY", defaults)
 
 
-def statement() -> bool:
-    """True if we should use statement-level triggers by default.
+def level() -> pgtrigger.Level:
+    """The default level for the event model.
 
     Returns:
-        A boolean
+        A level, either `pghistory.Row` or `pghistory.Statement`
     """
-    return getattr(settings, "PGHISTORY_STATEMENT", False)
+    return getattr(settings, "PGHISTORY_LEVEL", pgtrigger.Row)
 
 
 def _get_kwargs(vals):

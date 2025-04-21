@@ -44,7 +44,7 @@ class DenormContext(models.Model):
     fk_field = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True)
 
 
-@pghistory.track(context_field=pghistory.ContextJSONField(), statement=True)
+@pghistory.track(context_field=pghistory.ContextJSONField(), level=pghistory.Statement)
 @pghistory.track(
     pghistory.InsertEvent("snapshot_no_id_insert"),
     pghistory.UpdateEvent("snapshot_no_id_update"),
@@ -52,7 +52,7 @@ class DenormContext(models.Model):
     context_field=pghistory.ContextJSONField(),
     context_id_field=None,
     model_name="DenormContextEventNoIdStatement",
-    statement=True,
+    level=pghistory.Statement,
 )
 class DenormContextStatement(models.Model):
     """
@@ -183,13 +183,15 @@ class EventModel(models.Model):
     pghistory.UpdateEvent("before_update", row=pghistory.Old),
     pghistory.DeleteEvent("before_delete", row=pghistory.Old),
     pghistory.UpdateEvent("after_update", condition=pghistory.AnyChange("dt_field")),
-    statement=True,
+    level=pghistory.Statement,
+    append_only=True,
 )
 @pghistory.track(
     pghistory.Tracker("no_pgh_obj_manual_event"),
     obj_field=None,
     model_name="NoPghObjEventStatement",
-    statement=True,
+    level=pghistory.Statement,
+    append_only=True,
 )
 class EventModelStatement(models.Model):
     """
@@ -208,7 +210,7 @@ class EventModelStatement(models.Model):
         condition=pghistory.Q(old__int_field2__lt=pghistory.F("new__int_field2")),
     ),
     pghistory.DeleteEvent("int_field1_deleted", condition=pghistory.Q(old__int_field1__lt=50)),
-    statement=True,
+    level=pghistory.Statement,
 )
 class CondStatement(models.Model):
     """
