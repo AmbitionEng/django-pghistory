@@ -51,7 +51,7 @@ To configure event models, do either of:
 - Apply model-specific defaults with [pghistory.track][] or by [creating a custom event model](#custom_event_models).
 - Apply global defaults with settings.
 
-See the [arguments to `pghistory.track`][] for most configuration options, which typically have a corresponding setting. For example, say we'd like to override the default `pgh_obj` field. Do this on an individual model with:
+See the arguments to [pghistory.track][] for most configuration options, which typically have a corresponding setting. For example, say we'd like to override the default `pgh_obj` field. Do this on an individual model with:
 
 ```python
 @pghistory.track(
