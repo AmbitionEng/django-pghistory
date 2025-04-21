@@ -84,7 +84,7 @@ class ManualEvent(Tracker):
 class RowEvent(Tracker):
     """For tracking an event automatically based on row-level changes."""
 
-    condition: Union[pgtrigger.Condition, None, constants.Unset] = constants.UNSET
+    condition: Union[Optional[pgtrigger.Condition], constants.Unset] = constants.UNSET
     operation: Optional[pgtrigger.Operation] = None
     row: Optional[str] = None
     trigger_name: Optional[str] = None
@@ -94,7 +94,7 @@ class RowEvent(Tracker):
         self,
         label: Optional[str] = None,
         *,
-        condition: Optional[pgtrigger.Condition] = None,
+        condition: Union[Optional[pgtrigger.Condition], constants.Unset] = constants.UNSET,
         operation: Optional[pgtrigger.Operation] = None,
         row: Optional[str] = None,
         trigger_name: Optional[str] = None,
