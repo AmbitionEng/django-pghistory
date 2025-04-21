@@ -58,7 +58,8 @@ class Context(models.Model):
                                 VALUES (_pgh_context_id, _pgh_context_metadata, NOW(), NOW())
                                 ON CONFLICT (id) DO UPDATE
                                     SET metadata = EXCLUDED.metadata,
-                                        updated_at = EXCLUDED.updated_at;
+                                        updated_at = EXCLUDED.updated_at
+                                    WHERE {cls._meta.db_table}.metadata != EXCLUDED.metadata;
                             RETURN _pgh_context_id;
                         ELSE
                             RETURN NULL;

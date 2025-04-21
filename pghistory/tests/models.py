@@ -53,6 +53,25 @@ class DenormContext(models.Model):
     fk_field = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True)
 
 
+@pghistory.track(context_field=pghistory.ContextJSONField(), level=pghistory.Statement)
+@pghistory.track(
+    pghistory.InsertEvent("snapshot_no_id_insert"),
+    pghistory.UpdateEvent("snapshot_no_id_update"),
+    obj_field=pghistory.ObjForeignKey(related_name="event_no_id"),
+    context_field=pghistory.ContextJSONField(),
+    context_id_field=None,
+    model_name="DenormContextEventNoIdStatement",
+    level=pghistory.Statement,
+)
+class DenormContextStatement(models.Model):
+    """
+    For testing denormalized context with statement-level triggers
+    """
+
+    int_field = models.IntegerField()
+    fk_field = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True)
+
+
 @pghistory.track(
     model_name="CustomModelSnapshot", obj_field=pghistory.ObjForeignKey(related_name="snapshot")
 )
@@ -165,6 +184,50 @@ class EventModel(models.Model):
 
     dt_field = models.DateTimeField()
     int_field = models.IntegerField()
+
+
+@pghistory.track(
+    pghistory.ManualEvent("manual_event"),
+    pghistory.InsertEvent("model.create"),
+    pghistory.UpdateEvent("before_update", row=pghistory.Old),
+    pghistory.DeleteEvent("before_delete", row=pghistory.Old),
+    pghistory.UpdateEvent("after_update", condition=pghistory.AnyChange("dt_field")),
+    level=pghistory.Statement,
+    append_only=True,
+)
+@pghistory.track(
+    pghistory.Tracker("no_pgh_obj_manual_event"),
+    obj_field=None,
+    model_name="NoPghObjEventStatement",
+    level=pghistory.Statement,
+    append_only=True,
+)
+class EventModelStatement(models.Model):
+    """
+    For testing model events with statement-level triggers
+    """
+
+    dt_field = models.DateTimeField()
+    int_field = models.IntegerField()
+
+
+@pghistory.track(
+    pghistory.InsertEvent("int_field1_created", condition=pghistory.Q(new__int_field1__gt=100)),
+    pghistory.UpdateEvent("int_field1_updated", condition=pghistory.AnyChange("int_field1")),
+    pghistory.UpdateEvent(
+        "int_field2_incr",
+        condition=pghistory.Q(old__int_field2__lt=pghistory.F("new__int_field2")),
+    ),
+    pghistory.DeleteEvent("int_field1_deleted", condition=pghistory.Q(old__int_field1__lt=50)),
+    level=pghistory.Statement,
+)
+class CondStatement(models.Model):
+    """
+    For testing conditional statement-level triggers
+    """
+
+    int_field1 = models.IntegerField()
+    int_field2 = models.IntegerField()
 
 
 class CustomEventModel(

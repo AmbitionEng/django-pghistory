@@ -2,6 +2,18 @@
 
 ## 3.6.0 (2025-04-21)
 
+#### Improvements
+
+  - Add support for statement-level history tracking triggers, offering substantial performance improvements for tracking history over bulk operations by [@wesleykendall](https://github.com/wesleykendall) in [#197](https://github.com/AmbitionEng/django-pghistory/pull/197).
+
+    Use `@pghistory.track(level=pghistory.Statement)` to leverage statement-level triggers in history tracking. Set is as the default with `PGHISTORY_LEVEL = pghistory.Statement`.
+
+    A usage guide was added to the "Performance and Scaling" section of the docs. It notes how it works with conditional history tracking and caveats to be aware of.
+
+  - Optimize context tracking by [@wesleykendall](https://github.com/wesleykendall) in [#197](https://github.com/AmbitionEng/django-pghistory/pull/197).
+
+    Context tracking in history triggers is significantly faster when there are many historical events in a span.
+
 #### Changes
 
   - Add support for Django 5.2, drop support for Postgres 13 by [@wesleykendall](https://github.com/wesleykendall) in [#196](https://github.com/AmbitionEng/django-pghistory/pull/196).

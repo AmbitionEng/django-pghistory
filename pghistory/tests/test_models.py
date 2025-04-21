@@ -935,5 +935,5 @@ def test_generated_field():
     tracked = pghistory.create_event_model(GeneratedFieldModel)
 
     event = Event(event_model=tracked, label="GeneratedFieldModel", operation=Update)
-    sql = event.get_func(tracked)
+    sql = event.get_func(tracked).func
     assert "generated_field" not in sql

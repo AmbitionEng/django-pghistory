@@ -106,6 +106,17 @@ Old = "OLD"
 For storing the trigger's "OLD" row in a [pghistory.RowEvent][]
 """
 
+Row = pgtrigger.Row
+"""
+For specifying a row-level trigger in a [pghistory.RowEvent][]
+"""
+
+Statement = pgtrigger.Statement
+"""
+For specifying a statement-level trigger in a [pghistory.RowEvent][]
+"""
+
+
 __all__ = [
     "AnyChange",
     "AllChange",
@@ -133,7 +144,9 @@ __all__ = [
     "ProxyField",
     "Q",
     "RelatedField",
+    "Row",
     "RowEvent",
+    "Statement",
     "track",
     "Tracker",
     "Update",

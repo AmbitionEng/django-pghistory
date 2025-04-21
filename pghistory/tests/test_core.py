@@ -77,9 +77,12 @@ def test_get_obj_field(settings):
 
 
 @pytest.mark.django_db
-def test_denorm_context_tracking():
+@pytest.mark.parametrize(
+    "denorm_context_model", [test_models.DenormContext, test_models.DenormContextStatement]
+)
+def test_denorm_context_tracking(denorm_context_model):
     """Test denormalized context tracking"""
-    denorm_model = ddf.G(test_models.DenormContext)
+    denorm_model = ddf.G(denorm_context_model)
     assert denorm_model.events.count() == 1
 
     event = denorm_model.events.first()
@@ -813,3 +816,52 @@ def test_concrete_inheritance():
     """
     m = ddf.G(test_models.ConcreteChild, name="John", age=20)
     assert m.events.all().count() == 1
+
+
+@pytest.mark.django_db
+def test_conditional_statement_trigger():
+    """
+    Verifies that conditional statement-level triggers work as expected
+    """
+    # No insert event is triggered
+    with pghistory.context(key="value"):
+        m = ddf.G(test_models.CondStatement, int_field1=1, int_field2=2)
+        assert not m.events.all().exists()
+        assert not pghistory.models.Context.objects.all().exists()
+
+    # Insert events are triggered here
+    with pghistory.context(key="value"):
+        test_models.CondStatement.objects.bulk_create(
+            [
+                test_models.CondStatement(int_field1=1, int_field2=2),
+                test_models.CondStatement(int_field1=2, int_field2=2),
+                test_models.CondStatement(int_field1=101, int_field2=2),
+                test_models.CondStatement(int_field1=102, int_field2=2),
+                test_models.CondStatement(int_field1=103, int_field2=2),
+                test_models.CondStatement(int_field1=104, int_field2=2),
+            ]
+        )
+        assert test_models.CondStatementEvent.objects.count() == 4
+        ctx = pghistory.models.Context.objects.get()
+        assert ctx.metadata == {"key": "value"}
+        assert set(
+            test_models.CondStatementEvent.objects.values_list("pgh_context_id", flat=True)
+        ) == {ctx.id}
+
+    # Update events are triggered here
+    with pghistory.context(key="value2"):
+        test_models.CondStatement.objects.filter(int_field1__gt=100).update(int_field2=100)
+        assert (
+            test_models.CondStatementEvent.objects.filter(pgh_label="int_field2_incr").count() == 4
+        )
+
+    test_models.CondStatement.objects.update(int_field1=0)
+    assert (
+        test_models.CondStatementEvent.objects.filter(pgh_label="int_field1_updated").count() == 7
+    )
+    assert test_models.CondStatementEvent.objects.all().count() == 15
+
+    # Update a primary key. It will result in the update not being tracked
+    first = test_models.CondStatement.objects.order_by("id").first()
+    test_models.CondStatement.objects.filter(id=first.id).update(id=first.id + 1000, int_field1=-1)
+    assert test_models.CondStatementEvent.objects.all().count() == 15

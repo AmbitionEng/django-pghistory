@@ -72,6 +72,12 @@ The default configuration for foreign keys in event models.
 
 *Default* `pghistory.ForeignKey()`
 
+#### PGHISTORY_LEVEL
+
+The default trigger level for [pghistory.RowEvent][] trackers.
+
+*Default* `pghistory.Row`
+
 #### PGHISTORY_OBJ_FIELD
 
 The default configuration for the `pgh_obj` field.

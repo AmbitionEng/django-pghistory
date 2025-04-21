@@ -4,30 +4,64 @@ Here we overview some of the main things to consider regarding performance and s
 
 ## Trigger Execution
 
-[Postgres row-level triggers](https://www.postgresql.org/docs/current/sql-createtrigger.html) are used to store events. When using a [pghistory.InsertEvent][] tracker, for example, this means a snapshot of your model is saved every time it is inserted or update. In other words, `Model.objects.bulk_create` or `Model.objects.update` can create multiple additional event rows across multiple queries.
-
-While this will have a performance impact when creating or updating models, keep in mind that triggers run in the database and do not require expensive round trips from the application. This can result in substantially better performance when compared to traditional history tracking solutions that are implemented in the application.
+[Postgres row-level triggers](https://www.postgresql.org/docs/current/sql-createtrigger.html) are used by default to store events. When using a [pghistory.InsertEvent][] tracker, for example, this means a snapshot of your model is saved every time it is inserted or update. In other words, `Model.objects.bulk_create` or `Model.objects.update` can create multiple additional event rows across multiple queries.
 
 !!! note
 
-    We have plans to support [statement level triggers](https://www.postgresql.org/docs/current/sql-createtrigger.html) in a future iteration of `django-pghistory`. This means there will be one bulk insert of events for every bulk operation on the tracked model.
+    While this will have a performance impact when creating or updating models, keep in mind that triggers run in the database and do not require expensive round trips from the application.
 
-When triggers execute, the following happens:
+One can override this behavior by using [statement-level triggers](https://www.geeksforgeeks.org/plsql-statement-level-triggers/), meaning history triggers will run per statement instead of per row. This can substantially speed-up large bulk operations where history triggers are fired.
 
-1. By default, context will be updated or inserted into the main `Context` model's table.
-2. A new entry will be made in the event table.
+This can be enabled in the following hierarchy:
 
-The following sections discuss considerations to help the performance of both operations in the trigger.
+- On the individual tracker level:
+```python
+@pghistory.track(pghistory.InsertEvent(level=pghistory.Statement))
+...
+```
+- On an event model:
+```python
+@pghistory.track(level=pghistory.Statement)
+...
+```
+- Globally in settings:
+```python
+PGHISTORY_LEVEL = pghistory.Statement
+```
 
-## Ignoring Context
+In other words, settings from the bottom of the hierarchy (e.g. settings) do not override any explicit setting of the level at higher levels.
 
-If you don't want to attach context to events, set `settings.PGHISTORY_CONTEXT_FIELD` to `None`. All event models won't include the `pgh_context` field, and the associated context operations won't happen.
+!!! danger
+
+    When using statement-level history triggers, conditions that span old and new rows, such as [pghistory.AnyChange][], do **not** track changes if the primary key is updated. If your application commonly updates primary keys, avoid using statement-level triggers.
+
+We recommend using statement-level triggers for performance-critical areas of your application, especially when the common use case is large bulk inserts or updates. Statement-level triggers generally underperform their row-level counterparts when only operating on small amounts of rows at a time, although the difference should be negligible.
+
+## Context Tracking
+
+### Ignoring Context
+
+When [tracking application context](./context.md), context will be updated or inserted into the main `Context` model's table for each trigger invocation.
+
+If context is not important to some of your event tables, you can turn it off entirely:
+
+- On an event model:
+```python
+@pghistory.track(context_field=None)
+...
+```
+- Globally in settings:
+```python
+PGHISTORY_CONTEXT_FIELD = None
+```
 
 !!! note
 
-    You can still track context on a per-event-model basis with the `context_field` argument to [pghistory.track][].
+    As with other settings, these provide the default values. More granular settings will not be overridden by the defaults.
 
-## Denormalizing Context
+When setting the context field to `None`, the event model(s) won't include the `pgh_context` field, and the associated context operations won't happen when those event triggers fire. This can be a performance improvement for those triggers while letting other historical events be linked with context.
+
+### Denormalizing Context
 
 As discussed in the [Denormalizing Context](event_models.md#denormalizing_context) section, you can avoid doing an update or insert on the main context table and instead duplicate the context data on the event model. This not only reduces the overhead of maintaining an index to the context table from the event table, but it also reduces the contention on a shared context table among multiple event triggers.
 
