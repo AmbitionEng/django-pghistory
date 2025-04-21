@@ -31,7 +31,6 @@ class Event(pgtrigger.Composer):
     row = "NEW"
     event_model = None
     when = pgtrigger.After
-    statement = None
 
     def __init__(
         self,
