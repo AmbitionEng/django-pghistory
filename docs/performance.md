@@ -4,7 +4,7 @@ Here we overview some of the main things to consider regarding performance and s
 
 ## Trigger Execution
 
-[Postgres row-level triggers](https://www.postgresql.org/docs/current/sql-createtrigger.html) are used by default to store events. When using a [pghistory.InsertEvent][] tracker, for example, this means a snapshot of your model is saved every time it is inserted or update. In other words, `Model.objects.bulk_create` or `Model.objects.update` can create multiple additional event rows across multiple queries.
+[Postgres row-level triggers](https://www.postgresql.org/docs/current/sql-createtrigger.html) are used by default to store events. When using a [pghistory.InsertEvent][] tracker, for example, this means a snapshot of your model is saved every time it is inserted or updated. In other words, `Model.objects.bulk_create` or `Model.objects.update` can create multiple additional event rows across multiple queries.
 
 !!! note
 
