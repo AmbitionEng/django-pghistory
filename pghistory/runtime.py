@@ -32,6 +32,15 @@ def _is_concurrent_statement(sql: Union[str, bytes]):
     return sql.startswith("create") and "concurrently" in sql
 
 
+def _is_dml_statement(sql: Union[str, bytes]):
+    """
+    True if the sql statement is a dml statement (insert, update, delete)
+    """
+    sql = sql.strip().lower() if sql else ""
+    sql = sql.decode() if isinstance(sql, bytes) else sql
+    return not sql.startswith("select")
+
+
 def _is_transaction_errored(cursor):
     """
     True if the current transaction is in an errored state
@@ -65,6 +74,7 @@ def _can_inject_variable(cursor, sql):
         not getattr(cursor, "name", None)
         and not _is_concurrent_statement(sql)
         and not _is_transaction_errored(cursor)
+        and _is_dml_statement(sql)
     )
 
 
