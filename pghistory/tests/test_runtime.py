@@ -25,12 +25,10 @@ def test_is_concurrent_statement(statement, expected):
 @pytest.mark.parametrize(
     "sql, params",
     [
-        ("select count(*) from auth_user where id = %s", (1,)),
-        ("select count(*) from auth_user where id = %(id)s", {"id": 5}),
-        ("select count(*) from auth_user", ()),
-        (b"select count(*) from auth_user where id = %s", (1,)),
-        (b"select count(*) from auth_user where id = %(id)s", {"id": 5}),
-        (b"select count(*) from auth_user", ()),
+        ("update auth_user set id= %s where id = %s", (1,1)),
+        ("update auth_user set id= %(id1)s where id = %(id2)s", {"id1": 5, "id2": 1}),
+        (b"update auth_user set id= %s where id = %s", (1,1)),
+        (b"update auth_user set id= %(id1)s where id = %(id2)s", {"id1": 5, "id2": 1}),
     ],
 )
 def test_inject_history_context(settings, mocker, sql, params):
