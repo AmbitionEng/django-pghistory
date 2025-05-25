@@ -26,9 +26,9 @@ def test_is_concurrent_statement(statement, expected):
     "sql, params",
     [
         ("update auth_user set id= %s where id = %s", (1,1)),
-        ("update auth_user set id= %(id1)s where id = %(id2)s", {"id1": 5, "id2": 1}),
+        ("update auth_user set id= %(id1)s where id = %(id2)s", {"id1": 1, "id2": 1}),
         (b"update auth_user set id= %s where id = %s", (1,1)),
-        (b"update auth_user set id= %(id1)s where id = %(id2)s", {"id1": 5, "id2": 1}),
+        (b"update auth_user set id= %(id1)s where id = %(id2)s", {"id1": 1, "id2": 1}),
     ],
 )
 def test_inject_history_context(settings, mocker, sql, params):
