@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.7.0 (2025-05-25)
+
+#### Changes
+
+  - Ignore appending tracking configuration to `SELECT` statements when tracking context by [@stephan0h](https://github.com/stephan0h) in [#207](https://github.com/AmbitionEng/django-pghistory/pull/207).
+  - Fix typo in docs by [@BStephenBB](https://github.com/BStephenBB) in [#198](https://github.com/AmbitionEng/django-pghistory/pull/198).
+
 ## 3.6.0 (2025-04-21)
 
 #### Improvements
