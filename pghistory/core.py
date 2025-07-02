@@ -492,7 +492,7 @@ def create_event_model(
     return event_model
 
 
-def ProxyField(proxy: str, field: Type[models.Field]):
+def ProxyField(proxy: str, field: models.Field):
     """
     Proxies a JSON field from a model and adds it as a field in the queryset.
 
