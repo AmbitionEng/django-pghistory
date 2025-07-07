@@ -42,7 +42,7 @@ This generates an event model named `TrackedModelEvent` that has every field fro
 
 ## Context
 
-Event models can have free-form *context* attached to them using the [pghistory.context][] context manager and decorator. For example:
+Event models can have free-form *context* metadata attached to them using the [pghistory.context][] context manager and decorator. For example:
 
 ```python
 with pghistory.context(user_id=1):
