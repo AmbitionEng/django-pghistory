@@ -5,6 +5,7 @@ import threading
 import uuid
 from typing import Any, Dict, Tuple, Union
 
+from asgiref.sync import sync_to_async
 from django.db import connection
 
 from pghistory import config, utils
@@ -184,7 +185,13 @@ class context(contextlib.ContextDecorator):
 
         return _tracker.value
 
+    async def __aenter__(self):
+        return await sync_to_async(self.__enter__)()
+
     def __exit__(self, *exc):
         if self._pre_execute_hook:
             delattr(_tracker, "value")
             self._pre_execute_hook.__exit__(*exc)
+
+    async def __aexit__(self, *exc):
+        return await sync_to_async(self.__exit__)(*exc)
