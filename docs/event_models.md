@@ -280,6 +280,10 @@ with pghistory.context(key="val1"):
 
 When using denormalized context, the first set of events will have `key: "val1"` in their context. The second set of events will have `key: "val2"`. When using a shared context table, all events will have `key: "val2"`.
 
+!!! warning
+
+    If migrating existing models to denormalized context, you will hit a migration error. See [this section of the troubleshooting guide](troubleshooting.md#migrating-to-denormalized-context) for a workaround.
+
 <a id="event_proxy"></a>
 ## Querying Context as Structured Fields
 
