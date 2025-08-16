@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.8.0 (2025-08-16)
+
+#### Improvements
+
+  - Add async support for `pghistory.context` by [qqii](https://github.com/qqii) in [#220](https://github.com/AmbitionEng/django-pghistory/pull/220).
+  - Add docs for how to migrate existing tracking models to denormalized context by [@wesleykendall](https://github.com/wesleykendall) in [#221](https://github.com/AmbitionEng/django-pghistory/pull/221).
+
+#### Fixes
+
+  - Fix type annotations in `ProxyField` and `json_encoder` by [@q0w](https://github.com/q0w) in [#213](https://github.com/AmbitionEng/django-pghistory/pull/213) and [#214](https://github.com/AmbitionEng/django-pghistory/pull/214).
+  - Improve doc example by [RooTooRD](https://github.com/RooTooRD) in [#215](https://github.com/AmbitionEng/django-pghistory/pull/215)
+  - Fix doc troubleshooting link by [qqii](https://github.com/qqii) in [#216](https://github.com/AmbitionEng/django-pghistory/pull/216).
+
 ## 3.7.0 (2025-05-25)
 
 #### Changes
