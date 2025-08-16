@@ -12,7 +12,8 @@ from django.utils.module_loading import import_string
 from pghistory import constants
 
 if TYPE_CHECKING:
-    from django.core.serializers.json import DjangoJSONEncoder
+    from json import JSONEncoder
+
     from django.db.models import Model, QuerySet
 
     from pghistory.admin import EventsAdmin
@@ -70,7 +71,7 @@ def install_context_func_on_migrate() -> bool:
     return getattr(settings, "PGHISTORY_INSTALL_CONTEXT_FUNC_ON_MIGRATE", False)
 
 
-def json_encoder() -> "DjangoJSONEncoder":
+def json_encoder() -> Type["JSONEncoder"]:
     """The JSON encoder when tracking context
 
     Returns:
