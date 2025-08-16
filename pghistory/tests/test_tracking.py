@@ -22,6 +22,7 @@ async def test_async_context():
     # async pytest django does not clean up the database. Clean up manually
     await test_models.BigAutoFieldModel.pgh_event_model.objects.all().adelete()
     await test_models.BigAutoFieldModel.objects.all().adelete()
+    await pghistory.models.Context.objects.all().adelete()
 
 
 @pytest.mark.django_db(transaction=True)
