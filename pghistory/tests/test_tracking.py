@@ -6,6 +6,24 @@ import pghistory.models
 import pghistory.tests.models as test_models
 
 
+@pytest.mark.asyncio
+@pytest.mark.django_db
+async def test_async_context():
+    async with pghistory.context(example="context"):
+        dummy = await test_models.BigAutoFieldModel.objects.acreate()
+
+    event = await test_models.BigAutoFieldModel.pgh_event_model.objects.select_related(
+        "pgh_context"
+    ).aget()
+    assert event.pgh_obj_id == dummy.id
+    assert event.pgh_context is not None
+    assert event.pgh_context.metadata == {"example": "context"}
+
+    # async pytest django does not clean up the database. Clean up manually
+    await test_models.BigAutoFieldModel.pgh_event_model.objects.all().adelete()
+    await test_models.BigAutoFieldModel.objects.all().adelete()
+
+
 @pytest.mark.django_db(transaction=True)
 def test_concurrent_index_creation():
     """
