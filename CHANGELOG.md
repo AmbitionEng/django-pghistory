@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.8.1 (2025-08-30)
+
+#### Fixes
+  - Ensure mixed-case table names work with event proxy models by [stephan0h](https://github.com/stephan0h) in [#226](https://github.com/AmbitionEng/django-pghistory/pull/226).
+
 ## 3.8.0 (2025-08-16)
 
 #### Improvements

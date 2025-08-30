@@ -460,7 +460,7 @@ class EventsQueryCompiler(SQLCompiler):
         event_table = event_model._meta.db_table
         prev_data_clause = f"""
             (
-              SELECT row_to_json(_prev_event) FROM {event_table} _prev_event
+              SELECT row_to_json(_prev_event) FROM "{event_table}" _prev_event
               WHERE _prev_event.pgh_obj_id = _event.pgh_obj_id
                 AND _prev_event.pgh_id < _event.pgh_id
               ORDER BY _prev_event.pgh_id DESC LIMIT 1
@@ -520,7 +520,7 @@ class EventsQueryCompiler(SQLCompiler):
                 {context_id_column_clause},
                 {context_column_clause},
                 {pgh_obj_id_column_clause}
-              FROM {event_table} _event
+              FROM "{event_table}" _event
               {context_join_clause}
               {where_clause}
               ORDER BY _event.pgh_id
