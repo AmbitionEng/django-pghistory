@@ -67,7 +67,7 @@ class TrackedModel(models.Model):
 Or globally with:
 
 ```python
-PGHISTORY_OBJ_FIELD = pghistory.ForeignKey(
+PGHISTORY_OBJ_FIELD = pghistory.ObjForeignKey(
     on_delete=models.CASCADE,
     db_constraint=True
 )
@@ -171,7 +171,7 @@ The default `pgh_context` field of event models can be set with `settings.PGH_CO
 
 By default, the context foreign key object uses `null=True` to ensure that context is optional.
 
-Similar to `pgh_obj`, the `pgh_context` argument and setting can be `None` if one wishes to ignore context tracking.m
+Similar to `pgh_obj`, the `pgh_context` argument and setting can be `None` if one wishes to ignore context tracking.
 
 ## `pgh_context_id` Field
 
