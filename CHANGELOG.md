@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.8.2 (2025-09-12)
+
+#### Fixes
+  - Fix documentation typos by [@valentijnscholten](https://github.com/valentijnscholten) in [#229](https://github.com/AmbitionEng/django-pghistory/pull/229).
+
 ## 3.8.1 (2025-08-30)
 
 #### Fixes
