@@ -9,13 +9,22 @@ import pghistory.utils
     "statement, expected",
     [
         ("create index concurrently", True),
-        ("create index", False),
+        ("create index", True),
+        ("select * from auth_user", True),
+        ("vacuum table", True),
+        ("analyze table", True),
+        ("checkpoint table", True),
+        ("discard all", True),
+        ("load extension", True),
+        ("cluster", True),
+        ("update auth_user set id= %s where id = %s", False),
         (b"create index concurrently", True),
-        (b"create index", False),
+        (b"select * from auth_user", True),
+        (b"update auth_user set id= %s where id = %s", False),
     ],
 )
-def test_is_concurrent_statement(statement, expected):
-    assert pghistory.runtime._is_concurrent_statement(statement) == expected
+def test_is_ignored_statement(statement, expected):
+    assert pghistory.runtime._is_ignored_statement(statement) == expected
 
 
 @pytest.mark.skipif(
