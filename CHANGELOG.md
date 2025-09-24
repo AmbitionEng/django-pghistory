@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.8.3 (2025-09-23)
+
+#### Fixes
+  - Ignore context tracking on VACUUM and other SQL statements that are either irrelevant or cause issues by [@wesleykendall](https://github.com/wesleykendall) in [#230](https://github.com/AmbitionEng/django-pghistory/pull/230).
+
 ## 3.8.2 (2025-09-12)
 
 #### Fixes

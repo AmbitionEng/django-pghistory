@@ -22,24 +22,34 @@ _tracker = threading.local()
 
 
 Context = collections.namedtuple("Context", ["id", "metadata"])
+IGNORED_SQL_PREFIXES = (
+    "select",
+    "vacuum",
+    "analyze",
+    "checkpoint",
+    "discard",
+    "load",
+    "cluster",
+    "reindex",
+    "create",
+    "alter",
+    "drop",
+)
 
 
-def _is_concurrent_statement(sql: Union[str, bytes]):
+def _is_ignored_statement(sql: Union[str, bytes]):
     """
-    True if the sql statement is concurrent and cannot be ran in a transaction
+    True if the sql statement is ignored for context tracking.
+    This includes select statements and other statements like vacuum.
+
+    Note: SQL is very complex. We may still inject context variables into
+    SQL that has CTEs, for example. Generally this should handle most cases
+    where it's impossible to even put a variable in the SQL, such as statements
+    that cannot be ran in a transaction (vacuum, etc).
     """
     sql = sql.strip().lower() if sql else ""
     sql = sql.decode() if isinstance(sql, bytes) else sql
-    return sql.startswith("create") and "concurrently" in sql
-
-
-def _is_dml_statement(sql: Union[str, bytes]):
-    """
-    True if the sql statement is a dml statement (insert, update, delete)
-    """
-    sql = sql.strip().lower() if sql else ""
-    sql = sql.decode() if isinstance(sql, bytes) else sql
-    return not sql.startswith("select")
+    return sql.startswith(IGNORED_SQL_PREFIXES)
 
 
 def _is_transaction_errored(cursor):
@@ -72,10 +82,9 @@ def _can_inject_variable(cursor, sql):
     setting. Ignore these cases for now.
     """
     return (
-        not getattr(cursor, "name", None)
-        and not _is_concurrent_statement(sql)
+        not _is_ignored_statement(sql)
+        and not getattr(cursor, "name", None)
         and not _is_transaction_errored(cursor)
-        and _is_dml_statement(sql)
     )
 
 
