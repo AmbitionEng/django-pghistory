@@ -50,6 +50,36 @@ def _is_ignored_statement(sql: Union[str, bytes]):
     sql = sql.strip().lower() if sql else ""
     sql = sql.decode() if isinstance(sql, bytes) else sql
     return sql.startswith(IGNORED_SQL_PREFIXES)
+    return sql.startswith("create") and "concurrently" in sql
+
+
+def _is_transaction_control_statement(sql: Union[str, bytes]):
+    """
+    True if the sql statement is a transaction control statement that must
+    be executed without any preceding statements in the transaction
+    """
+    sql = sql.strip().lower() if sql else ""
+    sql = sql.decode() if isinstance(sql, bytes) else sql
+
+    # Transaction control statements that must be first in transaction
+    transaction_control_patterns = [
+        "set transaction isolation level",
+        "set transaction read",
+        "set session characteristics",
+        "begin",
+        "start transaction",
+    ]
+
+    return any(sql.startswith(pattern) for pattern in transaction_control_patterns)
+
+
+def _is_dml_statement(sql: Union[str, bytes]):
+    """
+    True if the sql statement is a dml statement (insert, update, delete)
+    """
+    sql = sql.strip().lower() if sql else ""
+    sql = sql.decode() if isinstance(sql, bytes) else sql
+    return not sql.startswith("select")
 
 
 def _is_transaction_errored(cursor):
@@ -80,10 +110,15 @@ def _can_inject_variable(cursor, sql):
 
     Concurrent index creation is also incompatible with local variable
     setting. Ignore these cases for now.
+
+    Transaction control statements like SET TRANSACTION ISOLATION LEVEL
+    must be executed without any preceding statements in the transaction,
+    so we cannot inject context variables before them.
     """
     return (
         not _is_ignored_statement(sql)
         and not getattr(cursor, "name", None)
+        and not _is_transaction_control_statement(sql)
         and not _is_transaction_errored(cursor)
     )
 
