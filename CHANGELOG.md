@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.9.0 (2025-11-30)
+
+#### Changes
+
+  - Drop Python 3.9 support, add Python 3.14 support by [@wesleykendall](https://github.com/wesleykendall) in [#242](https://github.com/AmbitionEng/django-pghistory/pull/242).
+  - Don't track transaction-altering statements in context tracking by [@valentijnscholten](https://github.com/valentijnscholten) in [#239](https://github.com/AmbitionEng/django-pghistory/pull/239).
+
 ## 3.8.3 (2025-09-23)
 
 #### Fixes

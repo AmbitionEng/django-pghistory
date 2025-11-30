@@ -161,7 +161,7 @@ def test_default_trackers(settings):
     ]
 
     for expected_tracker, tracker in zip(
-        settings.PGHISTORY_DEFAULT_TRACKERS, config.default_trackers()
+        settings.PGHISTORY_DEFAULT_TRACKERS, config.default_trackers(), strict=True
     ):
         # Trackers should be the same type, but different instances due to copying
         assert type(expected_tracker) is type(tracker)
