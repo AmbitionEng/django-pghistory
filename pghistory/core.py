@@ -598,7 +598,7 @@ class _InsertEventCompiler(compiler.SQLInsertCompiler):
         assert len(ret) == 1
         params = [
             param if field.name != "pgh_context" else Literal("_pgh_attach_context()")
-            for field, param in zip(self.query.fields, ret[0][1])
+            for field, param in zip(self.query.fields, ret[0][1], strict=True)
         ]
 
         return [(ret[0][0], params)]
@@ -679,7 +679,7 @@ def create_event(obj: models.Model, *, label: str, using: str = "default") -> mo
         if isinstance(vals, list) and len(vals) == 1:  # pragma: no branch
             vals = vals[0]
 
-        for field, val in zip(event_model._meta.fields, vals):
+        for field, val in zip(event_model._meta.fields, vals, strict=True):
             setattr(event_obj, field.attname, val)
 
         return event_obj
