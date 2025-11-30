@@ -34,6 +34,10 @@ IGNORED_SQL_PREFIXES = (
     "create",
     "alter",
     "drop",
+    "set transaction",
+    "set session",
+    "begin",
+    "start",
 )
 
 
@@ -78,8 +82,8 @@ def _can_inject_variable(cursor, sql):
     for iterators and other statements that read the database,
     so it seems to be safe to ignore named cursors.
 
-    Concurrent index creation is also incompatible with local variable
-    setting. Ignore these cases for now.
+    Ignore these cases, errored transactions, and other common
+    SQL cases where context should not be injected.
     """
     return (
         not _is_ignored_statement(sql)
