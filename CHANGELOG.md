@@ -52,6 +52,10 @@
 
     A usage guide was added to the "Performance and Scaling" section of the docs. It notes how it works with conditional history tracking and caveats to be aware of.
 
+    > **Note**
+    >
+    > This upgrade includes a data migration ([0007_0007_auto_20250421_0444.py](https://github.com/AmbitionEng/django-pghistory/blob/main/pghistory/migrations/0007_auto_20250421_0444.py)), which should be nearly instant on any database.
+
   - Optimize context tracking by [@wesleykendall](https://github.com/wesleykendall) in [#197](https://github.com/AmbitionEng/django-pghistory/pull/197).
 
     Context tracking in history triggers is significantly faster when there are many historical events in a span.
