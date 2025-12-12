@@ -458,12 +458,12 @@ class EventsQueryCompiler(SQLCompiler):
         ) = self._get_context_clauses(event_model)
 
         event_table = event_model._meta.db_table
-        prev_data_clause = f"""
-            (
-              SELECT row_to_json(_prev_event) FROM "{event_table}" _prev_event
-              WHERE _prev_event.pgh_obj_id = _event.pgh_obj_id
-                AND _prev_event.pgh_id < _event.pgh_id
-              ORDER BY _prev_event.pgh_id DESC LIMIT 1
+
+        # Use LAG window function instead of N+1 subquery for better performance
+        prev_data_clause = """
+            LAG(row_to_json(_event)) OVER (
+              PARTITION BY _event.pgh_obj_id
+              ORDER BY _event.pgh_id
             ) AS _prev_data
         """
         pgh_obj_id_column_clause = "pgh_obj_id::TEXT"
