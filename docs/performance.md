@@ -94,6 +94,16 @@ PGHISTORY_FOREIGN_KEY_FIELD = pghistory.ForeignKey(
 
 Remember that there will be a performance hit for maintaining the foreign key constraint, and Django will also have to cascade delete more models.
 
+
+## Using a connection pooling proxy
+
+`pghistory` propagates request/context to PostgreSQL using `set_config` (session/connection-scoped GUC state) so that triggers/functions can read it when writing history.
+
+With connection poolers that multiplex clients onto shared connections (e.g., PgBouncer in **transaction** or **statement** pooling or RDS Proxy), session-scoped state may create **session pinning** (keeping a client bound to a single backend connection) under the assumption that the value of the `set_config` parameters may affect the query. This can reduce pool reuse and increase the number of backend connections needed.
+
+This does not pin read statements, but in write-heavy systems, this may necessitate significantly more connections between your pooler and your database. After enabling `pghistory`, review your pooler/proxy telemetry (e.g., pinning metrics, pool saturation, backend connection counts) to ensure pooling behavior matches expectations.
+
+
 ## The `Events` Proxy Model
 
 The [pghistory.models.Events][] proxy model uses a common table expression (CTE) across event tables to query an aggregate view of data. Postgres 12 optimizes filters on CTEs, but you may experience performance issues if trying to directly filter `Events` on earlier versions of Postgres. Similarly, aggregating many large event tables is likely to simply just be slow given the nature of this query.
