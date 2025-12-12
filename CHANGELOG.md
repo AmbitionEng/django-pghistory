@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.9.1 (2025-12-11)
+
+#### Changes
+
+  - Update CHANGELOG with migration note by [@mlissner](https://github.com/mlissner) in [#246](https://github.com/AmbitionEng/django-pghistory/pull/246).
+  - Add connection pooling proxy section to performance doc by [@mlissner](https://github.com/mlissner) in [#247](https://github.com/AmbitionEng/django-pghistory/pull/247).
+
 ## 3.9.0 (2025-11-30)
 
 #### Changes
