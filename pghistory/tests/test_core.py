@@ -7,6 +7,7 @@ import django
 import pytest
 from django.apps import apps
 from django.db import DatabaseError, models
+from django.test.utils import override_settings
 from django.utils import timezone
 
 import pghistory
@@ -865,3 +866,15 @@ def test_conditional_statement_trigger():
     first = test_models.CondStatement.objects.order_by("id").first()
     test_models.CondStatement.objects.filter(id=first.id).update(id=first.id + 1000, int_field1=-1)
     assert test_models.CondStatementEvent.objects.all().count() == 15
+
+
+@pytest.mark.django_db
+def test_warning_when_simplifying_trigger_names_disabled():
+    with override_settings(PGHISTORY_SIMPLIFY_TRIGGER_NAMES=False):
+        with pytest.warns(DeprecationWarning, match="Trigger names.*are deprecated"):
+            import importlib
+
+            import pghistory.core
+
+            # force reload to force the warning
+            importlib.reload(pghistory.core)
