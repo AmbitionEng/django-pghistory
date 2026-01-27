@@ -6,7 +6,7 @@
 
 Activate the admin integration by adding `pghistory.admin` to `settings.INSTALLED_APPS`.
 
-!!! important
+!!! warning
 
     Be sure to add `pghistory.admin` *above* the `django.contrib.admin`, otherwise the custom admin templates won't be used.
 
