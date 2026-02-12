@@ -5,12 +5,14 @@ from __future__ import annotations
 import copy
 import re
 import sys
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 import django
 import pgtrigger
 import pgtrigger.core
 from django.apps import apps
+from django.conf import settings
 from django.db import connections, models
 from django.db.models import sql
 from django.db.models.fields.related import RelatedField
@@ -44,6 +46,17 @@ else:
 
 
 _registered_trackers = {}
+
+# avoid default trigger name duplication
+PGHISTORY_SIMPLIFY_TRIGGER_NAMES = getattr(settings, "PGHISTORY_SIMPLIFY_TRIGGER_NAMES", False)
+if not PGHISTORY_SIMPLIFY_TRIGGER_NAMES:
+    warnings.warn(
+        "Trigger names like 'update_update' are deprecated. "
+        "Set PGHISTORY_SIMPLIFY_TRIGGER_NAMES=True to enable simplified names. "
+        "This will become the default in a future release.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
 
 
 class Tracker:
@@ -105,7 +118,17 @@ class RowEvent(Tracker):
         self.condition = condition or self.condition
         self.operation = operation or self.operation
         self.row = row or self.row
-        self.trigger_name = trigger_name or self.trigger_name or f"{self.label}_{self.operation}"
+
+        if trigger_name:
+            self.trigger_name = trigger_name
+        elif self.trigger_name:
+            self.trigger_name = self.trigger_name
+        else:
+            if PGHISTORY_SIMPLIFY_TRIGGER_NAMES and self.label == self.operation:
+                self.trigger_name = str(self.operation)
+            else:
+                self.trigger_name = f"{self.label}_{self.operation}"
+
         self.level = level if self.level is not None else self.level
 
         if self.condition is constants.UNSET:
