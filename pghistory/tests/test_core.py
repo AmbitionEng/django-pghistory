@@ -4,6 +4,7 @@ from contextlib import ExitStack as no_exception
 
 import ddf
 import django
+import pgtrigger
 import pytest
 from django.apps import apps
 from django.db import DatabaseError, models
@@ -46,6 +47,19 @@ def test_duplicate_registration():
     with pytest.raises(ValueError, match="already exists"):
         pghistory.InsertEvent("snapshot_insert").pghistory_setup(test_models.CustomModelEvent)
         pghistory.InsertEvent("snapshot_insert").pghistory_setup(test_models.CustomModelSnapshot)
+
+
+def test_update_event_condition_none_overrides_default():
+    tracker = pghistory.UpdateEvent(condition=None)
+    assert tracker.condition is None
+
+    default_tracker = pghistory.UpdateEvent()
+    assert isinstance(default_tracker.condition, pgtrigger.AnyChange)
+
+
+def test_rowevent_level_override_respected():
+    tracker = pghistory.UpdateEvent(level=pghistory.Statement)
+    assert tracker.level == pghistory.Statement
 
 
 def test_pgh_event_model():

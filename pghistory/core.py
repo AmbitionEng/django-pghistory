@@ -102,11 +102,13 @@ class RowEvent(Tracker):
     ):
         super().__init__(label=label)
 
-        self.condition = condition or self.condition
+        # Allow explicit overrides like condition=None. Only fall back to the
+        # class default when the caller did not provide a condition at all.
+        self.condition = condition if condition is not constants.UNSET else self.condition
         self.operation = operation or self.operation
         self.row = row or self.row
         self.trigger_name = trigger_name or self.trigger_name or f"{self.label}_{self.operation}"
-        self.level = level if self.level is not None else self.level
+        self.level = level if level is not None else self.level
 
         if self.condition is constants.UNSET:
             self.condition = pgtrigger.AnyChange() if self.operation == pgtrigger.Update else None
