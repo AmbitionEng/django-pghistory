@@ -74,7 +74,7 @@ docker-start:
 .PHONY: lock
 lock:
 	$(EXEC_WRAPPER) uv lock
-	$(EXEC_WRAPPER) uv export --frozen --no-hashes --all-groups --format requirements.txt -o docs/requirements.txt
+	$(EXEC_WRAPPER) uv export --frozen --no-hashes --all-groups --format requirements.txt --no-annotate --no-header --no-editable --no-emit-project -o docs/requirements.txt
 
 
 # Install dependencies
@@ -152,7 +152,7 @@ lint:
 	$(EXEC_WRAPPER) ruff format . --check
 	$(EXEC_WRAPPER) ruff check ${MODULE_NAME}
 	$(EXEC_WRAPPER) bash -c 'make docs'
-	$(EXEC_WRAPPER) uv export --frozen --no-hashes --all-groups --format requirements.txt -o /tmp/dev-requirements.txt
+	$(EXEC_WRAPPER) uv export --frozen --no-hashes --all-groups --format requirements.txt --no-annotate --no-header --no-editable --no-emit-project -o /tmp/dev-requirements.txt
 	$(EXEC_WRAPPER) diff /tmp/dev-requirements.txt docs/requirements.txt >/dev/null 2>&1 || exit 1
 
 
