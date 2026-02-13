@@ -26,6 +26,7 @@ orbs:
           - checkout
           - restore_cache:
               key: v7-{{ checksum "uv.lock" }}
+          - run: python -m pip install uv
           - run: make dependencies
           - run: make full-test-suite
           - save_cache:
@@ -56,6 +57,7 @@ jobs:
       - checkout
       - restore_cache:
           key: v7-{{ checksum "uv.lock" }}
+      - run: python -m pip install uv
       - run: make dependencies
       - run: make lint
 
@@ -65,6 +67,7 @@ jobs:
       - checkout
       - restore_cache:
           key: v7-{{ checksum "uv.lock" }}
+      - run: python -m pip install uv
       - run: make dependencies
       - run: make type-check || true
 
@@ -75,6 +78,7 @@ jobs:
       - run: ssh-add -D
       - restore_cache:
           key: v7-{{ checksum "uv.lock" }}
+      - run: python -m pip install uv
       - run: make dependencies
       - run: uv run python devops.py deploy
 
