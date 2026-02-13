@@ -25,13 +25,13 @@ orbs:
         steps:
           - checkout
           - restore_cache:
-              key: v6-{{ checksum "poetry.lock" }}
+              key: v7-{{ checksum "uv.lock" }}
           - run: make dependencies
           - run: make full-test-suite
           - save_cache:
-              key: v6-{{ checksum "poetry.lock" }}
+              key: v7-{{ checksum "uv.lock" }}
               paths:
-                - /home/circleci/.cache/pypoetry/
+                - /home/circleci/.cache/uv
                 - /code/.venv
                 - /code/.tox
 
@@ -55,7 +55,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v6-{{ checksum "poetry.lock" }}
+          key: v7-{{ checksum "uv.lock" }}
       - run: make dependencies
       - run: make lint
 
@@ -64,7 +64,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: v6-{{ checksum "poetry.lock" }}
+          key: v7-{{ checksum "uv.lock" }}
       - run: make dependencies
       - run: make type-check || true
 
@@ -74,9 +74,9 @@ jobs:
       - checkout
       - run: ssh-add -D
       - restore_cache:
-          key: v6-{{ checksum "poetry.lock" }}
+          key: v7-{{ checksum "uv.lock" }}
       - run: make dependencies
-      - run: poetry run python devops.py deploy
+      - run: uv run python devops.py deploy
 
 workflows:
   version: 2

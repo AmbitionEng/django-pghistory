@@ -73,14 +73,14 @@ docker-start:
 # Lock dependencies
 .PHONY: lock
 lock:
-	$(EXEC_WRAPPER) poetry lock
-	$(EXEC_WRAPPER) poetry export --with dev --without-hashes -f requirements.txt > docs/requirements.txt
+	$(EXEC_WRAPPER) uv lock
+	$(EXEC_WRAPPER) uv export --frozen --no-hashes --all-groups --format requirements.txt -o docs/requirements.txt
 
 
 # Install dependencies
 .PHONY: dependencies
 dependencies:
-	$(EXEC_WRAPPER) poetry install --no-ansi
+	$(EXEC_WRAPPER) uv sync --frozen --all-groups
 
 
 # Sets up the local database
@@ -97,7 +97,6 @@ db-setup:
 .PHONY: conda-create
 conda-create:
 	-conda env create -f environment.yml -y
-	$(EXEC_WRAPPER) poetry config virtualenvs.create false --local
 
 
 # Sets up a Conda development environment
@@ -153,7 +152,8 @@ lint:
 	$(EXEC_WRAPPER) ruff format . --check
 	$(EXEC_WRAPPER) ruff check ${MODULE_NAME}
 	$(EXEC_WRAPPER) bash -c 'make docs'
-	$(EXEC_WRAPPER) diff <(poetry export --with dev --without-hashes -f requirements.txt) docs/requirements.txt >/dev/null 2>&1 || exit 1
+	$(EXEC_WRAPPER) uv export --frozen --no-hashes --all-groups --format requirements.txt -o /tmp/dev-requirements.txt
+	$(EXEC_WRAPPER) diff /tmp/dev-requirements.txt docs/requirements.txt >/dev/null 2>&1 || exit 1
 
 
 # Fix common linting errors
