@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.9.2 (2026-02-17)
+
+#### Fixes
+
+  - Fixes two correctness issues in RowEvent.__init__ that made explicit overrides for `condition` and `level` unreliable by [@mustafa0x](https://github.com/mustafa0x) in [#253](https://github.com/AmbitionEng/django-pghistory/pull/253).
+
+#### Changes
+
+  - Add warning admonition in docs for pghistory admin installation by [@rik](https://github.com/rik) in [#252](https://github.com/AmbitionEng/django-pghistory/pull/252).
+
 ## 3.9.1 (2025-12-11)
 
 #### Changes
