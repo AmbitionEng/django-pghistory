@@ -36,6 +36,7 @@ IGNORED_SQL_PREFIXES = (
     "drop",
     "set transaction",
     "set session",
+    "set local",
     "begin",
     "start",
 )

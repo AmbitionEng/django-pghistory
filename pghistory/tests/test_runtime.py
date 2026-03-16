@@ -37,6 +37,8 @@ import pghistory.utils
         ("SET search_path = public", False),
         (b"SET TRANSACTION ISOLATION LEVEL REPEATABLE READ", True),
         (b"SELECT * FROM table", True),
+        ("set local statement_timeout to %s", True),
+        ("SET LOCAL TIMEZONE to %s", True),
     ],
 )
 def test_is_ignored_statement(statement, expected):
