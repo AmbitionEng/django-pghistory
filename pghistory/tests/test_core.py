@@ -915,3 +915,29 @@ def test_no_warning_when_simplifying_trigger_names_enabled():
             if issubclass(w.category, DeprecationWarning) and "Trigger names" in str(w.message)
         ]
         assert not matching, "Expected no DeprecationWarning when simplification is enabled"
+
+
+@pytest.mark.django_db
+def test_trigger_name_resolution():
+    tracker = pghistory.core.UpdateEvent(trigger_name="my_custom_trigger")
+    assert tracker.trigger_name == "my_custom_trigger"
+
+    # already defined
+    # 1. label == operation → trigger_name = str(operation)
+    class MyEvent(pghistory.core.UpdateEvent):
+        trigger_name = "class_level_trigger"
+
+    tracker = MyEvent()
+    assert tracker.trigger_name == "class_level_trigger"
+
+    with override_settings(PGHISTORY_SIMPLIFY_TRIGGER_NAMES=True):
+        tracker = pghistory.core.UpdateEvent()  # label="update", operation=Update
+        assert tracker.trigger_name == str(pgtrigger.Update)
+
+    with override_settings(PGHISTORY_SIMPLIFY_TRIGGER_NAMES=False):
+        import warnings
+
+        with warnings.catch_warnings(record=True):
+            warnings.simplefilter("always")
+            tracker = pghistory.core.UpdateEvent(label="snapshot")  # label != operation
+            assert tracker.trigger_name == f"snapshot_{pgtrigger.Update}"
