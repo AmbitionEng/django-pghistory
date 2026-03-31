@@ -8,6 +8,7 @@ import pgtrigger
 import pytest
 from django.apps import apps
 from django.db import DatabaseError, models
+from django.test.utils import override_settings
 from django.utils import timezone
 
 import pghistory
@@ -879,3 +880,64 @@ def test_conditional_statement_trigger():
     first = test_models.CondStatement.objects.order_by("id").first()
     test_models.CondStatement.objects.filter(id=first.id).update(id=first.id + 1000, int_field1=-1)
     assert test_models.CondStatementEvent.objects.all().count() == 15
+
+
+@pytest.mark.django_db
+def test_warning_when_simplifying_trigger_names_disabled():
+    import warnings
+
+    with override_settings(PGHISTORY_SIMPLIFY_TRIGGER_NAMES=False):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            # Instantiating UpdateEvent triggers _simplify_trigger_names() internally
+            pghistory.core.UpdateEvent()
+
+        matching = [
+            w
+            for w in caught
+            if issubclass(w.category, DeprecationWarning) and "Trigger names" in str(w.message)
+        ]
+        assert matching, "Expected a DeprecationWarning about trigger names"
+
+
+@pytest.mark.django_db
+def test_no_warning_when_simplifying_trigger_names_enabled():
+    import warnings
+
+    with override_settings(PGHISTORY_SIMPLIFY_TRIGGER_NAMES=True):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            pghistory.core.UpdateEvent()
+
+        matching = [
+            w
+            for w in caught
+            if issubclass(w.category, DeprecationWarning) and "Trigger names" in str(w.message)
+        ]
+        assert not matching, "Expected no DeprecationWarning when simplification is enabled"
+
+
+@pytest.mark.django_db
+def test_trigger_name_resolution():
+    tracker = pghistory.core.UpdateEvent(trigger_name="my_custom_trigger")
+    assert tracker.trigger_name == "my_custom_trigger"
+
+    # already defined
+    # 1. label == operation → trigger_name = str(operation)
+    class MyEvent(pghistory.core.UpdateEvent):
+        trigger_name = "class_level_trigger"
+
+    tracker = MyEvent()
+    assert tracker.trigger_name == "class_level_trigger"
+
+    with override_settings(PGHISTORY_SIMPLIFY_TRIGGER_NAMES=True):
+        tracker = pghistory.core.UpdateEvent()  # label="update", operation=Update
+        assert tracker.trigger_name == str(pgtrigger.Update)
+
+    with override_settings(PGHISTORY_SIMPLIFY_TRIGGER_NAMES=False):
+        import warnings
+
+        with warnings.catch_warnings(record=True):
+            warnings.simplefilter("always")
+            tracker = pghistory.core.UpdateEvent(label="snapshot")  # label != operation
+            assert tracker.trigger_name == f"snapshot_{pgtrigger.Update}"

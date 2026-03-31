@@ -5,12 +5,14 @@ from __future__ import annotations
 import copy
 import re
 import sys
+import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 import django
 import pgtrigger
 import pgtrigger.core
 from django.apps import apps
+from django.conf import settings
 from django.db import connections, models
 from django.db.models import sql
 from django.db.models.fields.related import RelatedField
@@ -44,6 +46,26 @@ else:
 
 
 _registered_trackers = {}
+
+
+# avoid default trigger name duplication
+def _simplify_trigger_names() -> bool:
+    """Return True if simplified trigger names are enabled.
+
+    Reads PGHISTORY_SIMPLIFY_TRIGGER_NAMES from Django settings at call time
+    so that override_settings() works correctly in tests and avoids emitting
+    a DeprecationWarning at module import time.
+    """
+    enabled = getattr(settings, "PGHISTORY_SIMPLIFY_TRIGGER_NAMES", False)
+    if not enabled:
+        warnings.warn(
+            "Trigger names like 'update_update' are deprecated. "
+            "Set PGHISTORY_SIMPLIFY_TRIGGER_NAMES=True to enable simplified names. "
+            "This will become the default in a future release.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+    return enabled
 
 
 class Tracker:
@@ -107,8 +129,19 @@ class RowEvent(Tracker):
         self.condition = condition if condition is not constants.UNSET else self.condition
         self.operation = operation or self.operation
         self.row = row or self.row
-        self.trigger_name = trigger_name or self.trigger_name or f"{self.label}_{self.operation}"
         self.level = level if level is not None else self.level
+
+        simplify = _simplify_trigger_names()
+
+        if trigger_name:
+            self.trigger_name = trigger_name
+        elif self.trigger_name:
+            self.trigger_name = self.trigger_name
+        else:
+            if simplify and self.label == self.operation:
+                self.trigger_name = str(self.operation)
+            else:
+                self.trigger_name = f"{self.label}_{self.operation}"
 
         if self.condition is constants.UNSET:
             self.condition = pgtrigger.AnyChange() if self.operation == pgtrigger.Update else None
