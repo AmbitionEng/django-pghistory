@@ -8,6 +8,7 @@ import pgtrigger
 import pytest
 from django.apps import apps
 from django.db import DatabaseError, models
+from django.test.utils import override_settings
 from django.utils import timezone
 
 import pghistory
@@ -879,3 +880,38 @@ def test_conditional_statement_trigger():
     first = test_models.CondStatement.objects.order_by("id").first()
     test_models.CondStatement.objects.filter(id=first.id).update(id=first.id + 1000, int_field1=-1)
     assert test_models.CondStatementEvent.objects.all().count() == 15
+
+
+@pytest.mark.django_db
+def test_warning_when_simplifying_trigger_names_disabled():
+    import warnings
+
+    with override_settings(PGHISTORY_SIMPLIFY_TRIGGER_NAMES=False):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            # Instantiating UpdateEvent triggers _simplify_trigger_names() internally
+            pghistory.core.UpdateEvent()
+
+        matching = [
+            w
+            for w in caught
+            if issubclass(w.category, DeprecationWarning) and "Trigger names" in str(w.message)
+        ]
+        assert matching, "Expected a DeprecationWarning about trigger names"
+
+
+@pytest.mark.django_db
+def test_no_warning_when_simplifying_trigger_names_enabled():
+    import warnings
+
+    with override_settings(PGHISTORY_SIMPLIFY_TRIGGER_NAMES=True):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            pghistory.core.UpdateEvent()
+
+        matching = [
+            w
+            for w in caught
+            if issubclass(w.category, DeprecationWarning) and "Trigger names" in str(w.message)
+        ]
+        assert not matching, "Expected no DeprecationWarning when simplification is enabled"
