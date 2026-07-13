@@ -683,21 +683,42 @@ class Events(models.Model):
         return [error for error in errors if error.id != "models.E017"]
 
 
+def _middleware_events_user_field():
+    """
+    Return the MiddlewareEvents user proxy field.
+
+    Uses a ForeignKey when AUTH_USER_MODEL's app is installed, otherwise a
+    TextField so pghistory can import without the user model app present.
+    """
+    auth_user_model = getattr(settings, "AUTH_USER_MODEL", None)
+    if auth_user_model:
+        try:
+            app_label, _ = auth_user_model.split(".", 1)
+        except ValueError:
+            app_label = None
+        if app_label and apps.is_installed(app_label):
+            return core.ProxyField(
+                "pgh_context__user",
+                models.ForeignKey(
+                    settings.AUTH_USER_MODEL,
+                    on_delete=models.DO_NOTHING,
+                    null=True,
+                    help_text="The user associated with the event.",
+                ),
+            )
+    return core.ProxyField(
+        "pgh_context__user",
+        models.TextField(null=True, help_text="The user associated with the event."),
+    )
+
+
 class MiddlewareEvents(Events):
     """
     A proxy model for aggregating events. Includes additional fields that
     are captured by the pghistory middleware
     """
 
-    user = core.ProxyField(
-        "pgh_context__user",
-        models.ForeignKey(
-            settings.AUTH_USER_MODEL,
-            on_delete=models.DO_NOTHING,
-            null=True,
-            help_text="The user associated with the event.",
-        ),
-    )
+    user = _middleware_events_user_field()
     url = core.ProxyField(
         "pgh_context__url",
         models.TextField(null=True, help_text="The url associated with the event."),

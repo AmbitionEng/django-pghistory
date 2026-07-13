@@ -146,3 +146,4 @@ Unlike individual event models, only the `pgh_context` field can be proxied on t
 ## Using the `MiddlewareEvents` model
 
 If you use [the middleware](context.md#middleware) to attach context on requests, you can make use of `pghistory.models.MiddlewareEvents`, which attaches a `user` and `url` field that correspond to the attributes captured by the middleware.
+When `settings.AUTH_USER_MODEL` is defined, the `user` field will be a foreign key to your `User` model. If it's `None`, for example when the `django.contrib.auth` app is not installed, it will be a plain `TextField`.
