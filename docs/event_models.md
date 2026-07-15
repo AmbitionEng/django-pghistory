@@ -167,7 +167,7 @@ Use `None` to ignore creating the `pgh_obj` field on the event model.
 
 ## `pgh_context` Field
 
-The default `pgh_context` field of event models can be set with `settings.PGH_CONTEXT_FIELD` or by supplying the `context_field` argument to [pghistory.track][] or [pghistory.create_event_model][]. It must be set to either a [pghistory.ContextForeignKey][] or [pghistory.ContextJSONField][] instance. When using the former, event models will reference a shared [pghistory.context][] model. When using the latter, context will be denormalized. We discuss this in detail in [Denormalizing Context](#denormalizing_context).
+The default `pgh_context` field of event models can be set with `settings.PGHISTORY_CONTEXT_FIELD` or by supplying the `context_field` argument to [pghistory.track][] or [pghistory.create_event_model][]. It must be set to either a [pghistory.ContextForeignKey][] or [pghistory.ContextJSONField][] instance. When using the former, event models will reference a shared [pghistory.context][] model. When using the latter, context will be denormalized. We discuss this in detail in [Denormalizing Context](#denormalizing_context).
 
 By default, the context foreign key object uses `null=True` to ensure that context is optional.
 
@@ -175,7 +175,7 @@ Similar to `pgh_obj`, the `pgh_context` argument and setting can be `None` if on
 
 ## `pgh_context_id` Field
 
-When denormalizing context, one can configure the default ID field used with `settings.PGH_CONTEXT_ID_FIELD` or by supplying the `context_id_field` to [pghistory.track][] or [pghistory.create_event_model][]. It must be set to a [pghistory.ContextUUIDField][] instance. We discuss this in detail in the [Denormalizing Context](#denormalizing_context) subsection.
+When denormalizing context, one can configure the default ID field used with `settings.PGHISTORY_CONTEXT_ID_FIELD` or by supplying the `context_id_field` to [pghistory.track][] or [pghistory.create_event_model][]. It must be set to a [pghistory.ContextUUIDField][] instance. We discuss this in detail in the [Denormalizing Context](#denormalizing_context) subsection.
 
 Set this to `None` to ignore storing the ID when denormalizing context.
 
