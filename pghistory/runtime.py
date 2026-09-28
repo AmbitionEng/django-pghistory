@@ -100,8 +100,12 @@ def _execute_wrapper(execute_result):
 
 
 def _inject_history_context(
-    execute, sql: Union[str, bytes], params: Union[Dict[str, Any], Tuple[Any, ...]], many, context
+    execute, sql: Any, params: Union[Dict[str, Any], Tuple[Any, ...]], many, context
 ):
+    if not isinstance(sql, (str, bytes)):
+        # A psycopg sql.Composable, e.g. sql.SQL(...).format(...), which cursor.execute accepts
+        sql = sql.as_string(context["connection"].connection)
+
     is_bytes = isinstance(sql, bytes)
     sql = sql.decode() if is_bytes else sql
     inject_vars = ""

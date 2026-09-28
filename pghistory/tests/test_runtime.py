@@ -1,7 +1,9 @@
+import ddf
 import pytest
 from django.db import connection
 
 import pghistory.runtime
+import pghistory.tests.models as test_models
 import pghistory.utils
 
 
@@ -65,3 +67,22 @@ def test_inject_history_context(settings, mocker, sql, params):
             cursor.execute(sql, params)
             query = connection.queries[-1]
             assert query["sql"].startswith(expected_sql)
+
+
+@pytest.mark.django_db
+def test_inject_history_context_composed_sql():
+    """psycopg's sql.Composable is valid for cursor.execute, so context injection must accept it"""
+    if pghistory.utils.psycopg_maj_version == 3:
+        from psycopg import sql
+    else:
+        from psycopg2 import sql
+
+    obj = ddf.G(test_models.EventModel)
+    query = sql.SQL("UPDATE {} SET int_field = %s WHERE id = %s").format(
+        sql.Identifier(test_models.EventModel._meta.db_table)
+    )
+    with pghistory.context() as ctx:
+        with connection.cursor() as cursor:
+            cursor.execute(query, (obj.int_field + 1, obj.id))
+
+    assert obj.events.get(pgh_label="before_update").pgh_context_id == ctx.id
