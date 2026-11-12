@@ -45,12 +45,20 @@ class Context(models.Model):
                     DECLARE
                         _pgh_context_id UUID;
                         _pgh_context_metadata JSONB;
+                        _pgh_context_id_raw TEXT;
+                        _pgh_context_metadata_raw TEXT;
                     BEGIN
+                        _pgh_context_id_raw := NULLIF(
+                            CURRENT_SETTING('pghistory.context_id', TRUE), '');
+                        _pgh_context_metadata_raw := NULLIF(
+                            CURRENT_SETTING('pghistory.context_metadata', TRUE), '');
+                        -- Avoid an exception-handling subtransaction when context is absent.
+                        IF _pgh_context_id_raw IS NULL OR _pgh_context_metadata_raw IS NULL THEN
+                            RETURN NULL;
+                        END IF;
                         BEGIN
-                            SELECT INTO _pgh_context_id
-                                CURRENT_SETTING('pghistory.context_id');
-                            SELECT INTO _pgh_context_metadata
-                                CURRENT_SETTING('pghistory.context_metadata');
+                            _pgh_context_id := _pgh_context_id_raw::UUID;
+                            _pgh_context_metadata := _pgh_context_metadata_raw::JSONB;
                             EXCEPTION WHEN OTHERS THEN
                         END;
                         IF _pgh_context_id IS NOT NULL AND _pgh_context_metadata IS NOT NULL THEN

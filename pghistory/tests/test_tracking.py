@@ -1,9 +1,135 @@
+import uuid
+
 import ddf
 import pytest
-from django.db import connection
+from django.db import connection, transaction
 
 import pghistory.models
 import pghistory.tests.models as test_models
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "context_id, metadata",
+    [
+        (None, None),
+        (None, "{}"),
+        ("00000000-0000-0000-0000-000000000001", None),
+        ("", ""),
+        ("", "{}"),
+        ("00000000-0000-0000-0000-000000000001", ""),
+        ("invalid-uuid", "{}"),
+        ("00000000-0000-0000-0000-000000000001", "invalid-json"),
+    ],
+)
+def test_attach_context_missing_or_invalid(context_id, metadata):
+    """Missing, reset, partial, and malformed settings do not create context."""
+    # A new connection distinguishes settings that have never existed from
+    # custom settings that PostgreSQL resets to empty strings after a transaction.
+    isolated_connection = connection.copy()
+    try:
+        with isolated_connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT current_setting('pghistory.context_id', TRUE), "
+                "current_setting('pghistory.context_metadata', TRUE)"
+            )
+            assert cursor.fetchone() == (None, None)
+            if context_id is not None:
+                cursor.execute(
+                    "SELECT set_config('pghistory.context_id', %s, FALSE)", [context_id]
+                )
+            if metadata is not None:
+                cursor.execute(
+                    "SELECT set_config('pghistory.context_metadata', %s, FALSE)", [metadata]
+                )
+            cursor.execute("SELECT _pgh_attach_context()")
+            assert cursor.fetchone() == (None,)
+    finally:
+        isolated_connection.close()
+
+    assert not pghistory.models.Context.objects.exists()
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "metadata, expected",
+    [("{}", {}), ("null", None), ('{"user":1}', {"user": 1}), ('""', ""), ("[]", [])],
+)
+def test_attach_context_valid_metadata(metadata, expected):
+    """An empty object and JSON null remain valid context metadata."""
+    context_id = uuid.uuid4()
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT set_config('pghistory.context_id', %s, TRUE)", [str(context_id)])
+        cursor.execute("SELECT set_config('pghistory.context_metadata', %s, TRUE)", [metadata])
+        cursor.execute("SELECT _pgh_attach_context()")
+        assert cursor.fetchone() == (context_id,)
+
+    context = pghistory.models.Context.objects.get()
+    assert context.id == context_id
+    assert context.metadata == expected
+
+
+@pytest.mark.django_db
+def test_attach_context_preserves_noop_and_updates():
+    """Reattaching unchanged context does not update the row or its timestamp."""
+    with pghistory.context(user=1) as ctx:
+        ddf.G(test_models.EventModel)
+        context = pghistory.models.Context.objects.get()
+        original_created_at = context.created_at
+        original_updated_at = context.updated_at
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT ctid::text FROM pghistory_context WHERE id = %s", [ctx.id])
+            original_ctid = cursor.fetchone()[0]
+            cursor.execute("SELECT _pgh_attach_context()")
+            assert cursor.fetchone() == (ctx.id,)
+            cursor.execute("SELECT ctid::text FROM pghistory_context WHERE id = %s", [ctx.id])
+            assert cursor.fetchone()[0] == original_ctid
+
+        context.refresh_from_db()
+        assert context.created_at == original_created_at
+        assert context.updated_at == original_updated_at
+
+        with pghistory.context(user=2):
+            ddf.G(test_models.EventModel)
+        context.refresh_from_db()
+        assert context.metadata == {"user": 2}
+        assert context.created_at == original_created_at
+        # NOW() retains the existing transaction-time timestamp semantics.
+        assert context.updated_at == original_updated_at
+
+
+@pytest.mark.django_db
+def test_attach_context_rolls_back_with_event():
+    """The fast path preserves the transaction boundary for context and events."""
+    with pghistory.context(user=1):
+        with pytest.raises(ValueError, match="rollback"):
+            with transaction.atomic():
+                ddf.G(test_models.EventModel)
+                assert pghistory.models.Context.objects.count() == 1
+                raise ValueError("rollback")
+
+    assert not pghistory.models.Context.objects.exists()
+    assert not test_models.EventModel.objects.exists()
+    assert all(
+        not event_model.objects.exists()
+        for event_model in set(test_models.EventModel.pgh_event_models.values())
+    )
+
+
+@pytest.mark.django_db
+def test_attach_context_update_rolls_back_with_event():
+    """Rolling back a later event also restores the existing context metadata."""
+    with pghistory.context(user=1):
+        model = ddf.G(test_models.EventModel)
+        with pytest.raises(ValueError, match="rollback"):
+            with transaction.atomic(), pghistory.context(user=2):
+                model.int_field += 1
+                model.save()
+                assert pghistory.models.Context.objects.get().metadata == {"user": 2}
+                raise ValueError("rollback")
+
+    assert pghistory.models.Context.objects.get().metadata == {"user": 1}
+    assert model.events.count() == 1
 
 
 @pytest.mark.asyncio
