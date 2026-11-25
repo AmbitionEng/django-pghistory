@@ -355,11 +355,11 @@ def create_event_model(
     *trackers: Tracker,
     fields: Union[List[str], None] = None,
     exclude: Union[List[str], None] = None,
-    obj_field: Union["ObjForeignKey", constants.Unset] = constants.UNSET,
+    obj_field: Union[Optional["ObjForeignKey"], constants.Unset] = constants.UNSET,
     context_field: Union[
-        "ContextForeignKey", "ContextJSONField", constants.Unset
+        "ContextForeignKey", "ContextJSONField", None, constants.Unset
     ] = constants.UNSET,
-    context_id_field: Union["ContextUUIDField", constants.Unset] = constants.UNSET,
+    context_id_field: Union[Optional["ContextUUIDField"], constants.Unset] = constants.UNSET,
     append_only: Union[bool, constants.Unset] = constants.UNSET,
     model_name: Union[str, None] = None,
     app_label: Union[str, None] = None,
@@ -515,9 +515,9 @@ def track(
     exclude: Optional[List[str]] = None,
     obj_field: Union[Optional["ObjForeignKey"], constants.Unset] = constants.UNSET,
     context_field: Union[
-        "ContextForeignKey", "ContextJSONField", constants.Unset
+        "ContextForeignKey", "ContextJSONField", None, constants.Unset
     ] = constants.UNSET,
-    context_id_field: Union["ContextUUIDField", constants.Unset] = constants.UNSET,
+    context_id_field: Union[Optional["ContextUUIDField"], constants.Unset] = constants.UNSET,
     append_only: Union[bool, constants.Unset] = constants.UNSET,
     model_name: Optional[str] = None,
     app_label: Optional[str] = None,
