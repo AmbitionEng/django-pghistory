@@ -148,6 +148,25 @@ def test_track_context_metadata_percent(mocker):
 
 
 @pytest.mark.django_db
+def test_track_context_raw_sql_percent_without_params():
+    """
+    Verifies that raw SQL with a literal percent sign and no params
+    can be executed while context is active
+    """
+    m = ddf.G("tests.EventModel")
+
+    with pghistory.context(key="val") as ctx:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "UPDATE tests_eventmodel SET dt_field = now() "
+                f"WHERE id = {m.id} AND 'abc' LIKE 'a%'"
+            )
+
+    event = m.events.get(pgh_label="after_update")
+    assert event.pgh_context_id == ctx.id
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize("event_model", [test_models.EventModel, test_models.EventModelStatement])
 def test_track_context_metadata(mocker, event_model):
     """
