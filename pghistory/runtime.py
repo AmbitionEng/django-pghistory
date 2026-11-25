@@ -124,6 +124,10 @@ def _inject_history_context(
 
         else:
             id_placeholder = metadata_placeholder = "%s"
+            if params is None:
+                # Without params, the original SQL is not parsed for placeholders.
+                # Since params are now passed, literal percent signs must be escaped.
+                sql = sql.replace("%", "%%")
             params = (*context_params.values(), *(params or ()))
 
         inject_vars = (
